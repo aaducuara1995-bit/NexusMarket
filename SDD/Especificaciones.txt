@@ -13,3 +13,8 @@ El modelo contempla principalmente:
 •	Devoluciones y Reembolsos, representan los procesos posteriores a una compra. 
 
 De esta manera, el Modelo de Dominio sirve como una base organizada para el desarrollo de NexusMarket, permitiendo llevar al código las principales necesidades y reglas de negocio identificadas en la especificación funcional..
+
+Domain
+├── Entities
+├── ValueObjects
+└── Enums
