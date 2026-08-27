@@ -1,0 +1,15 @@
+El Modelo de Dominio de NexusMarket representa los principales elementos y procesos de negocio de una plataforma Marketplace, tomando como base la especificación funcional del sistema.
+Para su construcción se aplican conceptos de Programación Orientada a Objetos y algunos principios de Diseño Dirigido por el Dominio (DDD), organizando la información mediante entidades, objetos de valor y enumeraciones.
+
+El modelo contempla principalmente:
+
+•	Usuarios, representan a las personas que interactúan con el sistema. 
+•	Compradores, representan a los usuarios que realizan las compras. 
+•	Vendedores, representan a quienes comercializan los productos. 
+•	Productos, representan los artículos físicos o digitales disponibles en el catálogo. 
+•	Bodegas e Inventario, permiten administrar el almacenamiento y las existencias de los productos. 
+•	Carritos y Pedidos, representan el proceso de selección y compra. 
+•	Facturas y Envíos, representan los procesos relacionados con la compra y entrega. 
+•	Devoluciones y Reembolsos, representan los procesos posteriores a una compra. 
+
+De esta manera, el Modelo de Dominio sirve como una base organizada para el desarrollo de NexusMarket, permitiendo llevar al código las principales necesidades y reglas de negocio identificadas en la especificación funcional..
