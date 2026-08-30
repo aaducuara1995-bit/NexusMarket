@@ -1,0 +1,16 @@
+Los Objetos de Valor de NexusMarket representan elementos del negocio que se caracterizan principalmente por su valor y significado, y no por tener una identidad propia. Estos objetos permiten organizar información que debe cumplir determinadas reglas de negocio y ayudan a mantener la integridad de los datos dentro del sistema.
+
+Para su construcción se aplican conceptos de Programación Orientada a Objetos y principios de Diseño Dirigido por el Dominio, permitiendo encapsular datos relacionados con las diferentes operaciones que realiza la plataforma Marketplace.
+
+El modelo contempla principalmente los siguientes Objetos de Valor:
+
+•	Correo Electrónico, representa la dirección de correo utilizada por los usuarios y otros actores del sistema. Permite validar que el formato del correo sea correcto.
+•	Dinero, representa los valores monetarios utilizados en el sistema, como precios de productos, subtotales, descuentos, impuestos, costos de envío y totales de las compras.
+•	Dirección, representa la información necesaria para identificar un lugar de residencia, entrega o ubicación de un usuario, vendedor o pedido. Puede contener datos como ciudad, dirección, barrio y código postal.
+•	Nombre, representa los nombres y apellidos de las personas registradas en el sistema, permitiendo mantener esta información organizada y validada.
+
+ValueObjects
+├── CorreoElectronico
+├── Dinero
+├── Direccion
+└── Nombre
