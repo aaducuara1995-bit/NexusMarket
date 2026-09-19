@@ -1,0 +1,8 @@
+namespace NexusMarket.Domain.Enums;
+
+public enum EstadoInventario
+{
+    disponible,
+    danado,
+    Bloqueado
+}
