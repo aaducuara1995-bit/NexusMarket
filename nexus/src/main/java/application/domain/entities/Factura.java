@@ -1,25 +1,33 @@
 package application.domain.entities;
 
-import application.domain.valueobjects.*;
+import application.domain.enums.EstadoPedido;
+import application.domain.valueobjects.Dinero;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-public class Factura
-{
-    public Guid Id { get; private set; }
+public class Factura {
 
-    public Pedido Pedido { get; private set; }
+    private final UUID id;
+    private final Pedido pedido;
+    private final Dinero total;
+    private final LocalDateTime fecha;
 
-    public Dinero Total { get; private set; }
+    public Factura(Pedido pedido) {
+        if (pedido == null)
+            throw new IllegalArgumentException("La factura debe estar asociada a un pedido.");
+        if (pedido.getEstado() == EstadoPedido.Carrito
+                || pedido.getEstado() == EstadoPedido.PendienteDePago)
+            throw new IllegalStateException("Solo se puede facturar un pedido que ya fue pagado.");
 
-    public DateTime Fecha { get; private set; }
-
-    public Factura(
-        Pedido pedido,
-        Dinero total)
-    {
-        Id = Guid.NewGuid();
-        Pedido = pedido;
-        Total = total;
-        Fecha = DateTime.Now;
+        this.id = UUID.randomUUID();
+        this.pedido = pedido;
+        this.total = pedido.calcularTotal();
+        this.fecha = LocalDateTime.now();
     }
+
+    public UUID getId() { return id; }
+    public Pedido getPedido() { return pedido; }
+    public Dinero getTotal() { return total; }
+    public LocalDateTime getFecha() { return fecha; }
 }

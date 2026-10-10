@@ -1,24 +1,17 @@
 package application.domain.valueobjects;
 
-@setter
-@getter
+public record Direccion(String calle, String ciudad, String departamento, String codigoPostal) {
 
-public class Direccion
-{
-    public string Calle { get; private set; }
-    public string Ciudad { get; private set; }
-    public string Departamento { get; private set; }
-    public string CodigoPostal { get; private set; }
+    public Direccion {
+        calle = requerido(calle, "La calle");
+        ciudad = requerido(ciudad, "La ciudad");
+        departamento = requerido(departamento, "El departamento");
+        codigoPostal = requerido(codigoPostal, "El código postal");
+    }
 
-    public Direccion(
-        string calle,
-        string ciudad,
-        string departamento,
-        string codigoPostal)
-    {
-        Calle = calle;
-        Ciudad = ciudad;
-        Departamento = departamento;
-        CodigoPostal = codigoPostal;
+    private static String requerido(String valor, String campo) {
+        if (valor == null || valor.isBlank())
+            throw new IllegalArgumentException(campo + " no puede estar vacío.");
+        return valor.trim();
     }
 }

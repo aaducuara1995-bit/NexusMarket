@@ -1,3 +1,5 @@
+package application.domain.enums;
+
 public enum EstadoProducto
 {
     Publicado,

@@ -2,8 +2,8 @@ package application.domain.entities;
 
 import application.domain.enums.EstadoProducto;
 import application.domain.enums.TipoProducto;
+import application.domain.valueobjects.Dinero;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,11 +17,11 @@ public class Producto {
     private final String descripcion;
     private final TipoProducto tipo;
     private final List<String> variantes = new ArrayList<>();
-    private BigDecimal precio;
+    private Dinero precio;
     private EstadoProducto estado;
 
     public Producto(UUID vendedorId, String nombre, String descripcion,
-                    TipoProducto tipo, BigDecimal precio) {
+                    TipoProducto tipo, Dinero precio) {
         if (vendedorId == null)
             throw new IllegalArgumentException("El producto debe pertenecer a un vendedor.");
         if (nombre == null || nombre.isBlank())
@@ -46,7 +46,7 @@ public class Producto {
         variantes.add(variante);
     }
 
-    public void cambiarPrecio(BigDecimal nuevoPrecio) {
+    public void cambiarPrecio(Dinero nuevoPrecio) {
         validarPrecio(nuevoPrecio);
         this.precio = nuevoPrecio;
     }
@@ -62,8 +62,8 @@ public class Producto {
         estado = EstadoProducto.Descontinuado;
     }
 
-    private static void validarPrecio(BigDecimal precio) {
-        if (precio == null || precio.signum() <= 0)
+    private static void validarPrecio(Dinero precio) {
+        if (precio == null || precio.monto().signum() <= 0)
             throw new IllegalArgumentException("El precio debe ser mayor que cero.");
     }
 
@@ -72,7 +72,7 @@ public class Producto {
     public String getNombre() { return nombre; }
     public String getDescripcion() { return descripcion; }
     public TipoProducto getTipo() { return tipo; }
-    public BigDecimal getPrecio() { return precio; }
+    public Dinero getPrecio() { return precio; }
     public EstadoProducto getEstado() { return estado; }
     public List<String> getVariantes() { return Collections.unmodifiableList(variantes); }
 }

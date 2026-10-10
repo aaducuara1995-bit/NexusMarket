@@ -1,16 +1,23 @@
 package application.domain.valueobjects;
 
-public class Dinero
-{
-    public decimal Monto { get; private set; }
-    public string Moneda { get; private set; }
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
-    public Dinero(decimal monto, string moneda = "COP")
-    {
-        if (monto < 0)
-            throw new ArgumentException("El monto no puede ser negativo.");
+public record Dinero(BigDecimal monto, String moneda) {
 
-        Monto = monto;
-        Moneda = moneda;
+    public Dinero {
+        if (monto == null)
+            throw new IllegalArgumentException("El monto es obligatorio.");
+        if (monto.signum() < 0)
+            throw new IllegalArgumentException("El monto no puede ser negativo.");
+        if (moneda == null || moneda.isBlank())
+            throw new IllegalArgumentException("La moneda es obligatoria.");
+
+        monto = monto.setScale(2, RoundingMode.HALF_UP);
+        moneda = moneda.trim().toUpperCase();
+    }
+
+    public Dinero(BigDecimal monto) {
+        this(monto, "COP");
     }
 }

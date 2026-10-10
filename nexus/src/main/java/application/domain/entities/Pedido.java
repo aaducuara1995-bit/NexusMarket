@@ -1,62 +1,67 @@
 package application.domain.entities;
 
-import application.domain.enums.*;
+import application.domain.enums.EstadoPedido;
+import application.domain.valueobjects.Dinero;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
-public class Pedido
-{
-    public Guid Id { get; private set; }
+public class Pedido {
 
-    public Comprador Comprador { get; private set; }
+    private final UUID id;
+    private final Comprador comprador;
+    private final List<ItemPedido> items = new ArrayList<>();
+    private final LocalDateTime fecha;
+    private EstadoPedido estado;
 
-    public List<Producto> Productos { get; private set; }
+    public Pedido(Carrito carrito) {
+        if (carrito == null)
+            throw new IllegalArgumentException("El carrito es obligatorio.");
+        if (carrito.getItems().isEmpty())
+            throw new IllegalArgumentException("No se puede crear un pedido con un carrito vacío.");
 
-    public EstadoPedido Estado { get; private set; }
-
-    public DateTime Fecha { get; private set; }
-
-    public Pedido(Comprador comprador)
-    {
-        Id = Guid.NewGuid();
-        Comprador = comprador;
-        Productos = new List<Producto>();
-        Estado = EstadoPedido.Carrito;
-        Fecha = DateTime.Now;
+        this.id = UUID.randomUUID();
+        this.comprador = carrito.getComprador();
+        carrito.getItems().forEach(
+                i -> items.add(new ItemPedido(i.getProducto(), i.getCantidad())));
+        this.fecha = LocalDateTime.now();
+        this.estado = EstadoPedido.PendienteDePago;
     }
 
-    public void AgregarProducto(Producto producto)
-    {
-        if (Estado != EstadoPedido.Carrito)
-            throw new InvalidOperationException(
-                "No se pueden agregar productos al pedido.");
-
-        Productos.Add(producto);
+    public Dinero calcularTotal() {
+        BigDecimal total = items.stream()
+                .map(i -> i.subtotal().monto())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new Dinero(total);
     }
 
-    public void Pagar()
-    {
-        if (Estado != EstadoPedido.PendienteDePago)
-            throw new InvalidOperationException(
-                "El pedido no está pendiente de pago.");
-
-        Estado = EstadoPedido.Pagado;
+    public void pagar() {
+        exigirEstado(EstadoPedido.PendienteDePago, "El pedido no está pendiente de pago.");
+        estado = EstadoPedido.Pagado;
     }
 
-    public void Enviar()
-    {
-        if (Estado != EstadoPedido.Pagado)
-            throw new InvalidOperationException(
-                "El pedido debe estar pagado.");
-
-        Estado = EstadoPedido.Despachado;
+    public void enviar() {
+        exigirEstado(EstadoPedido.Pagado, "El pedido debe estar pagado.");
+        estado = EstadoPedido.Despachado;
     }
 
-    public void Finalizar()
-    {
-        if (Estado != EstadoPedido.Despachado)
-            throw new InvalidOperationException(
-                "El pedido debe estar despachado.");
-
-        Estado = EstadoPedido.Entregado;
+    public void finalizar() {
+        exigirEstado(EstadoPedido.Despachado, "El pedido debe estar despachado.");
+        estado = EstadoPedido.Entregado;
     }
+
+    private void exigirEstado(EstadoPedido esperado, String mensaje) {
+        if (estado != esperado)
+            throw new IllegalStateException(mensaje);
+    }
+
+    public UUID getId() { return id; }
+    public Comprador getComprador() { return comprador; }
+    public LocalDateTime getFecha() { return fecha; }
+    public EstadoPedido getEstado() { return estado; }
+    public List<ItemPedido> getItems() { return Collections.unmodifiableList(items); }
 }
