@@ -1,6 +1,7 @@
-using NexusMarket.Domain.Enums;
+package application.domain.entities;
 
-namespace NexusMarket.Domain.Entities;
+import application.domain.enums.*;
+
 
 public class Producto
 {

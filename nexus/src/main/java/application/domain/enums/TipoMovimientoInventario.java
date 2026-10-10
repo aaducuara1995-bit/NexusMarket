@@ -1,4 +1,4 @@
-namespace NexusMarket.Domain.Enums;
+package application.domain.enums;
 
 public enum TipoMovimientoInventario
 {

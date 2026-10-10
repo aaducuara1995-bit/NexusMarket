@@ -1,4 +1,4 @@
-namespace NexusMarket.Domain.ValueObjects;
+package application.domain.valueobjects;
 
 @setter
 @getter

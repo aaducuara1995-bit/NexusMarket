@@ -1,4 +1,4 @@
-namespace NexusMarket.Domain.Entities;
+package application.domain.entities;
 
 public class Bodega
 {

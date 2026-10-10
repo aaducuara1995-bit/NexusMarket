@@ -1,7 +1,8 @@
-using NexusMarket.Domain.Enums;
-using NexusMarket.Domain.ValueObjects;
+package application.domain.entities;
 
-namespace NexusMarket.Domain.Entities;
+import application.domain.enums.*;
+import application.domain.valueobjects.*;
+
 
 public class Usuario
 {

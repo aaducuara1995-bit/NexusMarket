@@ -1,6 +1,7 @@
-using NexusMarket.Domain.ValueObjects;
+package application.domain.entities;
 
-namespace NexusMarket.Domain.Entities;
+import application.domain.valueobjects.*;
+
 
 public class Envio
 {
