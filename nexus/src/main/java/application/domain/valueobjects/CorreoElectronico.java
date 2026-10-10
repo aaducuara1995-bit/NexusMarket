@@ -1,19 +1,14 @@
 package application.domain.valueobjects;
 
-public class CorreoElectronico
-{
-    public string Valor { get; private set; }
+public record CorreoElectronico(String valor) {
 
-    public CorreoElectronico(string valor)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
-            throw new ArgumentException("El correo electrónico es obligatorio.");
+    public CorreoElectronico {
+        if (valor == null || valor.isBlank())
+            throw new IllegalArgumentException("El correo no puede estar vacío.");
 
-        Valor = valor;
-    }
+        valor = valor.trim().toLowerCase();
 
-    public override string ToString()
-    {
-        return Valor;
+        if (!valor.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
+            throw new IllegalArgumentException("El formato del correo no es válido.");
     }
 }

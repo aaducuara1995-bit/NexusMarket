@@ -1,24 +1,14 @@
 package application.domain.valueobjects;
 
-public class DocumentoIdentidad
-{
-    public string Valor { get; }
+public record DocumentoIdentidad(String valor) {
 
-    public DocumentoIdentidad(string valor)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
-            throw new ArgumentException("El documento de identidad no puede estar vacío.");
+    public DocumentoIdentidad {
+        if (valor == null || valor.isBlank())
+            throw new IllegalArgumentException("El documento de identidad no puede estar vacío.");
 
-        if (!valor.All(char.IsDigit))
-            throw new ArgumentException("El documento de identidad solo debe contener números.");
+        valor = valor.trim();
 
-        Valor = valor;
+        if (!valor.chars().allMatch(Character::isDigit))
+            throw new IllegalArgumentException("El documento de identidad solo debe contener números.");
     }
-
-    public override bool Equals(object? obj) =>
-        obj is DocumentoIdentidad otro && Valor == otro.Valor;
-
-    public override int GetHashCode() => Valor.GetHashCode();
-
-    public override string ToString() => Valor;
 }

@@ -1,24 +1,14 @@
 package application.domain.valueobjects;
 
-public class NombreCompleto
-{
-    public string Nombres { get; private set; }
-    public string Apellidos { get; private set; }
+public record NombreCompleto(String nombres, String apellidos) {
 
-    public NombreCompleto(string nombres, string apellidos)
-    {
-        if (string.IsNullOrWhiteSpace(nombres))
-            throw new ArgumentException("Los nombres son obligatorios.");
+    public NombreCompleto {
+        if (nombres == null || nombres.isBlank())
+            throw new IllegalArgumentException("Los nombres no pueden estar vacíos.");
+        if (apellidos == null || apellidos.isBlank())
+            throw new IllegalArgumentException("Los apellidos no pueden estar vacíos.");
 
-        if (string.IsNullOrWhiteSpace(apellidos))
-            throw new ArgumentException("Los apellidos son obligatorios.");
-
-        Nombres = nombres;
-        Apellidos = apellidos;
-    }
-
-    public override string ToString()
-    {
-        return $"{Nombres} {Apellidos}";
+        nombres = nombres.trim();
+        apellidos = apellidos.trim();
     }
 }

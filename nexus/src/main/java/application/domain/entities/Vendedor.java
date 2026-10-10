@@ -15,11 +15,6 @@ public class Vendedor {
         this.usuarioId = usuarioId;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getUsuarioId() {
-        return usuarioId;
-    }
+    public UUID getId() { return id; }
+    public UUID getUsuarioId() { return usuarioId; }
 }

@@ -1,65 +1,77 @@
 package application.domain.entities;
 
-import application.domain.enums.*;
+import application.domain.enums.EstadoInventario;
 
+import java.util.UUID;
 
-public class Inventario
-{
-    public Guid Id { get; private set; }
-    public Producto Producto { get; private set; }
-    public Bodega Bodega { get; private set; }
-    public int Cantidad { get; private set; }
-    public int Reservado { get; private set; }
-    public EstadoInventario Estado { get; private set; }
+public class Inventario {
 
-    public int Disponible => Cantidad - Reservado;
+    private final UUID id;
+    private final Producto producto;
+    private final Bodega bodega;
+    private int cantidad;
+    private int reservado;
+    private EstadoInventario estado;
 
-    public Inventario(Producto producto, Bodega bodega, int cantidadInicial)
-    {
+    public Inventario(Producto producto, Bodega bodega, int cantidadInicial) {
+        if (producto == null || bodega == null)
+            throw new IllegalArgumentException("Producto y bodega son obligatorios.");
         if (cantidadInicial < 0)
-            throw new ArgumentException("El inventario no puede ser negativo.");
+            throw new IllegalArgumentException("El inventario no puede ser negativo.");
 
-        Id = Guid.NewGuid();
-        Producto = producto;
-        Bodega = bodega;
-        Cantidad = cantidadInicial;
-        Reservado = 0;
-        Estado = EstadoInventario.Disponible;
+        this.id = UUID.randomUUID();
+        this.producto = producto;
+        this.bodega = bodega;
+        this.cantidad = cantidadInicial;
+        this.reservado = 0;
+        this.estado = EstadoInventario.Disponible;
     }
 
-    public void Reservar(int cantidad)
-    {
-        if (cantidad <= 0)
-            throw new ArgumentException("La cantidad debe ser mayor que cero.");
-        if (Estado != EstadoInventario.Disponible)
-            throw new InvalidOperationException("No se puede reservar inventario que no está disponible.");
-        if (Disponible < cantidad)
-            throw new InvalidOperationException("No hay unidades suficientes para reservar.");
-
-        Reservado += cantidad;
+    public int getDisponible() {
+        return cantidad - reservado;
     }
 
-    public void LiberarReserva(int cantidad)
-    {
-        if (cantidad <= 0 || cantidad > Reservado)
-            throw new ArgumentException("Cantidad inválida para liberar.");
-
-        Reservado -= cantidad;
+    public void ingresar(int unidades) {
+        validarPositiva(unidades);
+        cantidad += unidades;
     }
 
-    public void ConfirmarSalida(int cantidad)
-    {
-        if (cantidad <= 0 || cantidad > Reservado)
-            throw new ArgumentException("La salida debe corresponder a una reserva vigente.");
+    public void reservar(int unidades) {
+        validarPositiva(unidades);
+        if (estado != EstadoInventario.Disponible)
+            throw new IllegalStateException("No se puede reservar inventario que no está disponible.");
+        if (getDisponible() < unidades)
+            throw new IllegalStateException("No hay unidades suficientes para reservar.");
 
-        Reservado -= cantidad;
-        Cantidad -= cantidad;
+        reservado += unidades;
     }
 
-    public void Ingresar(int cantidad)
-    {
-        if (cantidad <= 0)
-            throw new ArgumentException("La cantidad debe ser mayor que cero.");
-        Cantidad += cantidad;
+    public void liberarReserva(int unidades) {
+        validarPositiva(unidades);
+        if (unidades > reservado)
+            throw new IllegalArgumentException("No hay tantas unidades reservadas.");
+
+        reservado -= unidades;
     }
+
+    public void confirmarSalida(int unidades) {
+        validarPositiva(unidades);
+        if (unidades > reservado)
+            throw new IllegalArgumentException("La salida debe corresponder a una reserva vigente.");
+
+        reservado -= unidades;
+        cantidad -= unidades;
+    }
+
+    private static void validarPositiva(int unidades) {
+        if (unidades <= 0)
+            throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
+    }
+
+    public UUID getId() { return id; }
+    public Producto getProducto() { return producto; }
+    public Bodega getBodega() { return bodega; }
+    public int getCantidad() { return cantidad; }
+    public int getReservado() { return reservado; }
+    public EstadoInventario getEstado() { return estado; }
 }

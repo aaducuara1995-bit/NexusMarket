@@ -1,30 +1,20 @@
 package application.domain.entities;
 
-import application.domain.enums.*;
-import application.domain.valueobjects.*;
+import java.util.UUID;
 
+public class Comprador {
 
-public class Comprador : Usuario
-{
-    public Direccion DireccionPrincipal { get; private set; }
+    private final UUID id;
+    private final UUID usuarioId;
 
-    public List<Direccion> DireccionesAdicionales { get; private set; }
+    public Comprador(UUID usuarioId) {
+        if (usuarioId == null)
+            throw new IllegalArgumentException("El comprador debe estar asociado a un usuario.");
 
-    public bool EstadoComercial { get; private set; }
-
-    public Comprador(
-        NombreCompleto nombreCompleto,
-        CorreoElectronico correo,
-        Direccion direccionPrincipal)
-        : base(nombreCompleto, correo, RolUsuario.Comprador)
-    {
-        DireccionPrincipal = direccionPrincipal;
-        DireccionesAdicionales = new List<Direccion>();
-        EstadoComercial = true;
+        this.id = UUID.randomUUID();
+        this.usuarioId = usuarioId;
     }
 
-    public void AgregarDireccion(Direccion direccion)
-    {
-        DireccionesAdicionales.Add(direccion);
-    }
+    public UUID getId() { return id; }
+    public UUID getUsuarioId() { return usuarioId; }
 }

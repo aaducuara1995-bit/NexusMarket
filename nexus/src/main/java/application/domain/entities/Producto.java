@@ -1,49 +1,78 @@
 package application.domain.entities;
 
-import application.domain.enums.*;
+import application.domain.enums.EstadoProducto;
+import application.domain.enums.TipoProducto;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
-public class Producto
-{
-    public Guid Id { get; private set; }
-    public string Nombre { get; private set; }
-    public string Descripcion { get; private set; }
-    public TipoProducto Tipo { get; private set; }
-    public EstadoProducto Estado { get; private set; }
+public class Producto {
 
-    private readonly List<string> _variantes = new();
-    public IReadOnlyList<string> Variantes => _variantes.AsReadOnly();
+    private final UUID id;
+    private final UUID vendedorId;
+    private final String nombre;
+    private final String descripcion;
+    private final TipoProducto tipo;
+    private final List<String> variantes = new ArrayList<>();
+    private BigDecimal precio;
+    private EstadoProducto estado;
 
-    public Producto(string nombre, string descripcion, TipoProducto tipo)
-    {
-        Id = Guid.NewGuid();
-        Nombre = nombre;
-        Descripcion = descripcion;
-        Tipo = tipo;
-        Estado = EstadoProducto.Suspendido;
+    public Producto(UUID vendedorId, String nombre, String descripcion,
+                    TipoProducto tipo, BigDecimal precio) {
+        if (vendedorId == null)
+            throw new IllegalArgumentException("El producto debe pertenecer a un vendedor.");
+        if (nombre == null || nombre.isBlank())
+            throw new IllegalArgumentException("El nombre no puede estar vacío.");
+        validarPrecio(precio);
+
+        this.id = UUID.randomUUID();
+        this.vendedorId = vendedorId;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.tipo = tipo;
+        this.precio = precio;
+        this.estado = EstadoProducto.Suspendido;
     }
 
-    public void AgregarVariante(string variante)
-    {
-        if (string.IsNullOrWhiteSpace(variante))
-            throw new ArgumentException("La variante no puede estar vacía.");
+    public void agregarVariante(String variante) {
+        if (variante == null || variante.isBlank())
+            throw new IllegalArgumentException("La variante no puede estar vacía.");
+        if (variantes.contains(variante))
+            throw new IllegalStateException("Esa variante ya existe en el producto.");
 
-        if (_variantes.Contains(variante))
-            throw new InvalidOperationException("Esa variante ya existe en el producto.");
-
-        _variantes.Add(variante);
+        variantes.add(variante);
     }
 
-    public void Publicar()
-    {
-        if (Estado == EstadoProducto.Descontinuado)
-            throw new InvalidOperationException("Un producto descontinuado no puede volver a publicarse.");
-
-        Estado = EstadoProducto.Publicado;
-    
-
-    public void Descontinuar()
-    {
-        Estado = EstadoProducto.Descontinuado;
+    public void cambiarPrecio(BigDecimal nuevoPrecio) {
+        validarPrecio(nuevoPrecio);
+        this.precio = nuevoPrecio;
     }
+
+    public void publicar() {
+        if (estado == EstadoProducto.Descontinuado)
+            throw new IllegalStateException("Un producto descontinuado no puede volver a publicarse.");
+
+        estado = EstadoProducto.Publicado;
+    }
+
+    public void descontinuar() {
+        estado = EstadoProducto.Descontinuado;
+    }
+
+    private static void validarPrecio(BigDecimal precio) {
+        if (precio == null || precio.signum() <= 0)
+            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+    }
+
+    public UUID getId() { return id; }
+    public UUID getVendedorId() { return vendedorId; }
+    public String getNombre() { return nombre; }
+    public String getDescripcion() { return descripcion; }
+    public TipoProducto getTipo() { return tipo; }
+    public BigDecimal getPrecio() { return precio; }
+    public EstadoProducto getEstado() { return estado; }
+    public List<String> getVariantes() { return Collections.unmodifiableList(variantes); }
 }
