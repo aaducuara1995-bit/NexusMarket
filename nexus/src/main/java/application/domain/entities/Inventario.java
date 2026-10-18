@@ -31,6 +31,10 @@ public class Inventario {
         return cantidad - reservado;
     }
 
+    public boolean esDe(UUID productoId, UUID bodegaId) {
+        return producto.getId().equals(productoId) && bodega.getId().equals(bodegaId);
+    }
+
     public void ingresar(int unidades) {
         validarPositiva(unidades);
         cantidad += unidades;
@@ -61,6 +65,50 @@ public class Inventario {
 
         reservado -= unidades;
         cantidad -= unidades;
+    }
+
+    public void ajustar(int diferencia) {
+        if (diferencia == 0)
+            throw new IllegalArgumentException("El ajuste no puede ser cero.");
+
+        int nueva = cantidad + diferencia;
+        if (nueva < 0)
+            throw new IllegalStateException("El ajuste dejaría existencias negativas.");
+        if (nueva < reservado)
+            throw new IllegalStateException("El ajuste dejaría menos unidades que las reservadas.");
+
+        cantidad = nueva;
+    }
+
+    public void reintegrar(int unidades) {
+        validarPositiva(unidades);
+        if (estado != EstadoInventario.Disponible)
+            throw new IllegalStateException("No se puede reintegrar a un inventario que no está disponible.");
+
+        cantidad += unidades;
+    }
+
+    public void marcarDanado() {
+        if (estado == EstadoInventario.Danado)
+            throw new IllegalStateException("El inventario ya está marcado como dañado.");
+        if (reservado > 0)
+            throw new IllegalStateException("Libera las reservas antes de marcar el inventario como dañado.");
+
+        estado = EstadoInventario.Danado;
+    }
+
+    public void bloquear() {
+        if (estado != EstadoInventario.Disponible)
+            throw new IllegalStateException("Solo se puede bloquear un inventario disponible.");
+
+        estado = EstadoInventario.Bloqueado;
+    }
+
+    public void habilitar() {
+        if (estado != EstadoInventario.Bloqueado)
+            throw new IllegalStateException("Solo se puede habilitar un inventario bloqueado.");
+
+        estado = EstadoInventario.Disponible;
     }
 
     private static void validarPositiva(int unidades) {

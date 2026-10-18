@@ -39,6 +39,18 @@ public class Pedido {
         return new Dinero(total);
     }
 
+    public boolean contieneProductosFisicos() {
+        return items.stream().anyMatch(ItemPedido::esFisico);
+    }
+
+    public boolean esSoloDigital() {
+        return !contieneProductosFisicos();
+    }
+
+    public boolean perteneceA(UUID compradorId) {
+        return comprador.getId().equals(compradorId);
+    }
+
     public void pagar() {
         exigirEstado(EstadoPedido.PendienteDePago, "El pedido no está pendiente de pago.");
         estado = EstadoPedido.Pagado;

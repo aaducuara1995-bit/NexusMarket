@@ -5,8 +5,7 @@ Para su construcción se aplican conceptos de Programación Orientada a Objetos 
 El modelo contempla principalmente las siguientes entidades:
 
 •	Usuario, representa a una persona registrada en la plataforma y contiene la información necesaria para su identificación y acceso al sistema.
-•	Comprador, representa al usuario que adquiere productos a través de NexusMarket y participa en el proceso de compra. Cada Comprador está asociado a un Usuario mediante su identificador, de modo que una misma persona puede tener simultáneamente el rol de Comprador y el de Vendedor.
-•	Vendedor, representa a la persona o negocio encargado de ofrecer y comercializar productos dentro de la plataforma, Cada Vendedor está asociado a un Usuario mediante su identificador
+•	Comprador, representa al usuario que adquiere productos a través de NexusMarket y participa en el proceso de compra. Cada Comprador está asociado a un Usuario mediante su identificador.
 •	Producto, representa los artículos físicos o digitales disponibles para la venta, incluyendo información como nombre, descripción y estado de publicación. Su disponibilidad real para la venta depende de las existencias registradas en Inventario.
 •	Bodega, representa el espacio destinado al almacenamiento y administración de los productos.
 •	Inventario, permite controlar las existencias de los productos y su disponibilidad dentro de las bodegas.

@@ -26,6 +26,8 @@ public class Producto {
             throw new IllegalArgumentException("El producto debe pertenecer a un vendedor.");
         if (nombre == null || nombre.isBlank())
             throw new IllegalArgumentException("El nombre no puede estar vacío.");
+        if (tipo == null)
+            throw new IllegalArgumentException("El tipo de producto es obligatorio.");
         validarPrecio(precio);
 
         this.id = UUID.randomUUID();
@@ -54,12 +56,38 @@ public class Producto {
     public void publicar() {
         if (estado == EstadoProducto.Descontinuado)
             throw new IllegalStateException("Un producto descontinuado no puede volver a publicarse.");
+        if (estado == EstadoProducto.Publicado)
+            throw new IllegalStateException("El producto ya está publicado.");
 
         estado = EstadoProducto.Publicado;
     }
 
+    public void suspender() {
+        if (estado == EstadoProducto.Descontinuado)
+            throw new IllegalStateException("Un producto descontinuado no puede suspenderse.");
+        if (estado == EstadoProducto.Suspendido)
+            throw new IllegalStateException("El producto ya está suspendido.");
+
+        estado = EstadoProducto.Suspendido;
+    }
+
     public void descontinuar() {
+        if (estado == EstadoProducto.Descontinuado)
+            throw new IllegalStateException("El producto ya está descontinuado.");
+
         estado = EstadoProducto.Descontinuado;
+    }
+
+    public boolean estaPublicado() {
+        return estado == EstadoProducto.Publicado;
+    }
+
+    public boolean esFisico() {
+        return tipo == TipoProducto.Fisico;
+    }
+
+    public boolean perteneceA(UUID idVendedor) {
+        return vendedorId.equals(idVendedor);
     }
 
     private static void validarPrecio(Dinero precio) {
