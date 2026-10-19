@@ -2,7 +2,6 @@ package application.domain.services;
 
 import application.domain.entities.Devolucion;
 import application.domain.entities.Inventario;
-import application.domain.entities.ItemPedido;
 import application.domain.entities.MovimientoInventario;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
@@ -35,18 +34,16 @@ public class ReintegroInventarioService {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
 
         UUID productoId = inventario.getProducto().getId();
-        int compradas = devolucion.getPedido().getItems().stream()
-                .filter(i -> i.getProductoId().equals(productoId))
-                .mapToInt(ItemPedido::getCantidad)
-                .sum();
-
-        if (compradas == 0)
+        if (devolucion.unidadesCompradas(productoId) == 0)
             throw new IllegalArgumentException("El producto no pertenece al pedido devuelto.");
-        if (unidades > compradas)
+
+        // La devoluciÃ³n recuerda lo ya reintegrado: no se devuelven unidades dos veces.
+        if (unidades > devolucion.unidadesPendientesDeReintegro(productoId))
             throw new IllegalArgumentException(
-                    "No se pueden reintegrar mÃ¡s unidades de las que se compraron.");
+                    "No se pueden reintegrar mÃ¡s unidades de las compradas en el pedido.");
 
         inventario.reintegrar(unidades);
+        devolucion.registrarReintegro(productoId, unidades);
 
         return new MovimientoInventario(
                 inventario, TipoMovimientoInventario.Devolucion, unidades,

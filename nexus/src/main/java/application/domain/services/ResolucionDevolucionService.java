@@ -1,0 +1,37 @@
+package application.domain.services;
+
+import application.domain.entities.Devolucion;
+import application.domain.entities.Usuario;
+import application.domain.enums.ProcesoNegocio;
+import application.domain.enums.RolUsuario;
+import application.domain.exceptions.AccesoDenegadoException;
+
+public class ResolucionDevolucionService {
+
+    private final AutorizacionService autorizacion;
+
+    public ResolucionDevolucionService(AutorizacionService autorizacion) {
+        if (autorizacion == null)
+            throw new IllegalArgumentException("El servicio de autorizaciÃ³n es obligatorio.");
+        this.autorizacion = autorizacion;
+    }
+
+    public void aprobar(Usuario actor, Devolucion devolucion) {
+        validar(actor, devolucion);
+        devolucion.aprobar();
+    }
+
+    public void rechazar(Usuario actor, Devolucion devolucion) {
+        validar(actor, devolucion);
+        devolucion.rechazar();
+    }
+
+    private void validar(Usuario actor, Devolucion devolucion) {
+        autorizacion.exigirPermiso(actor, ProcesoNegocio.GestionDevoluciones);
+        // El comprador solicita, pero no puede resolver su propia devoluciÃ³n.
+        if (!actor.tieneRol(RolUsuario.Administrador))
+            throw new AccesoDenegadoException("Solo un administrador puede resolver devoluciones.");
+        if (devolucion == null)
+            throw new IllegalArgumentException("La devoluciÃ³n es obligatoria.");
+    }
+}
