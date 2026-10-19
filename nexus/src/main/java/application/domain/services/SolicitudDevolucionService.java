@@ -16,7 +16,7 @@ public class SolicitudDevolucionService {
 
     public SolicitudDevolucionService(AutorizacionService autorizacion) {
         if (autorizacion == null)
-            throw new IllegalArgumentException("El servicio de autorizaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de autorización es obligatorio.");
         this.autorizacion = autorizacion;
     }
 
@@ -31,7 +31,7 @@ public class SolicitudDevolucionService {
             throw new IllegalArgumentException("La lista de devoluciones existentes es obligatoria.");
 
         if (!usuario.tieneRol(RolUsuario.Comprador))
-            throw new AccesoDenegadoException("Solo el comprador puede solicitar una devoluciÃ³n.");
+            throw new AccesoDenegadoException("Solo el comprador puede solicitar una devolución.");
         if (!comprador.getUsuarioId().equals(usuario.getId()))
             throw new AccesoDenegadoException("El comprador no corresponde a este usuario.");
         if (!pedido.perteneceA(comprador.getId()))
@@ -40,9 +40,9 @@ public class SolicitudDevolucionService {
         boolean hayOtraAbierta = existentes.stream()
                 .anyMatch(d -> d.getPedido().getId().equals(pedido.getId()) && d.estaAbierta());
         if (hayOtraAbierta)
-            throw new IllegalStateException("El pedido ya tiene una devoluciÃ³n en curso o aprobada.");
+            throw new IllegalStateException("El pedido ya tiene una devolución en curso o aprobada.");
 
-        // La propia devoluciÃ³n exige que el pedido estÃ© entregado y que haya un motivo.
+        // La propia devolución exige que el pedido esté entregado y que haya un motivo.
         return new Devolucion(pedido, motivo);
     }
 }

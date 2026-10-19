@@ -19,7 +19,7 @@ public class ValidacionVendedorService {
         if (!vendedor.getUsuarioId().equals(usuario.getId()))
             throw new AccesoDenegadoException("El vendedor no corresponde a este usuario.");
         if (!usuario.estaActivo())
-            throw new IllegalStateException("El usuario estÃ¡ bloqueado y no puede operar.");
+            throw new IllegalStateException("El usuario está bloqueado y no puede operar.");
     }
 
     public void exigirPropietario(Usuario usuario, Vendedor vendedor, Producto producto) {

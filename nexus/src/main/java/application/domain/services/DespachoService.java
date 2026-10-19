@@ -30,17 +30,17 @@ public class DespachoService {
         if (pedido == null)
             throw new IllegalArgumentException("El pedido es obligatorio.");
         if (envio == null)
-            throw new IllegalArgumentException("El envÃ­o es obligatorio.");
+            throw new IllegalArgumentException("El envío es obligatorio.");
         if (reservas == null)
             throw new IllegalArgumentException("La lista de reservas es obligatoria.");
 
         // Se valida todo antes de modificar algo, para no despachar a medias.
         if (!envio.getPedido().getId().equals(pedido.getId()))
-            throw new IllegalArgumentException("El envÃ­o no corresponde al pedido.");
+            throw new IllegalArgumentException("El envío no corresponde al pedido.");
         if (pedido.getEstado() != EstadoPedido.Pagado)
             throw new IllegalStateException("El pedido debe estar pagado para despacharse.");
         if (envio.getEstado() != EstadoEnvio.Pendiente)
-            throw new IllegalStateException("El envÃ­o ya fue despachado.");
+            throw new IllegalStateException("El envío ya fue despachado.");
         if (pedido.contieneProductosFisicos() && reservas.isEmpty())
             throw new IllegalStateException("El pedido no tiene stock reservado para despachar.");
 

@@ -44,12 +44,12 @@ public class ConfirmacionPedidoService {
         if (!carrito.getComprador().getId().equals(comprador.getId()))
             throw new AccesoDenegadoException("El carrito pertenece a otro comprador.");
         if (carrito.getItems().isEmpty())
-            throw new IllegalArgumentException("No se puede confirmar un carrito vacÃ­o.");
+            throw new IllegalArgumentException("No se puede confirmar un carrito vacío.");
 
         for (ItemCarrito item : carrito.getItems()) {
             if (!item.getProducto().estaPublicado())
                 throw new IllegalStateException(
-                        "El producto " + item.getProducto().getNombre() + " ya no estÃ¡ publicado.");
+                        "El producto " + item.getProducto().getNombre() + " ya no está publicado.");
         }
 
         Pedido pedido = new Pedido(carrito);
@@ -64,7 +64,7 @@ public class ConfirmacionPedidoService {
                 movimientos.addAll(resultado.movimientos());
             }
         } catch (RuntimeException e) {
-            // Todo o nada: si un producto falla, se deshace lo que ya se habÃ­a reservado.
+            // Todo o nada: si un producto falla, se deshace lo que ya se había reservado.
             liberacionService.liberar(reservas);
             throw e;
         }

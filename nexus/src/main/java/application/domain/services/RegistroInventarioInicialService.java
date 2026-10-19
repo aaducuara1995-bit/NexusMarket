@@ -35,7 +35,7 @@ public class RegistroInventarioInicialService {
             throw new IllegalArgumentException("La lista de inventarios existentes es obligatoria.");
 
         if (!producto.esFisico())
-            throw new IllegalStateException("Solo los productos fÃ­sicos llevan inventario.");
+            throw new IllegalStateException("Solo los productos físicos llevan inventario.");
 
         if (actor.tieneRol(RolUsuario.Vendedor)
                 && !(bodega.esDelMarketplace() || bodega.perteneceA(vendedor.getId())))

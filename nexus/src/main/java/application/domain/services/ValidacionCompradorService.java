@@ -24,9 +24,9 @@ public class ValidacionCompradorService {
         if (!comprador.getUsuarioId().equals(usuario.getId()))
             throw new AccesoDenegadoException("El comprador no corresponde a este usuario.");
         if (!usuario.estaActivo())
-            throw new IllegalStateException("El usuario estÃ¡ bloqueado y no puede comprar.");
+            throw new IllegalStateException("El usuario está bloqueado y no puede comprar.");
         if (!comprador.puedeComprar())
-            throw new IllegalStateException("El comprador estÃ¡ restringido y no puede realizar compras.");
+            throw new IllegalStateException("El comprador está restringido y no puede realizar compras.");
     }
 
     private static void validarEntradas(Usuario usuario, Comprador comprador) {

@@ -25,7 +25,7 @@ public class LiberacionReservaService {
             movimientos.add(new MovimientoInventario(
                     reserva.getInventario(), TipoMovimientoInventario.Reserva,
                     -reserva.getCantidad(),
-                    "LiberaciÃ³n de la reserva del pedido " + reserva.getPedidoId()));
+                    "Liberación de la reserva del pedido " + reserva.getPedidoId()));
         }
         return movimientos;
     }

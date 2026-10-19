@@ -17,7 +17,7 @@ public class PublicacionProductoService {
     public PublicacionProductoService(AutorizacionService autorizacion,
                                       ValidacionVendedorService validacionVendedor) {
         if (autorizacion == null || validacionVendedor == null)
-            throw new IllegalArgumentException("Los servicios de validaciÃ³n son obligatorios.");
+            throw new IllegalArgumentException("Los servicios de validación son obligatorios.");
         this.autorizacion = autorizacion;
         this.validacionVendedor = validacionVendedor;
     }
@@ -29,10 +29,10 @@ public class PublicacionProductoService {
         if (inventarios == null)
             throw new IllegalArgumentException("La lista de inventarios es obligatoria.");
 
-        // Los productos fÃ­sicos requieren existencias; los digitales no (se entregan tras el pago).
+        // Los productos físicos requieren existencias; los digitales no (se entregan tras el pago).
         if (producto.esFisico() && !consulta.hayDisponibilidad(producto, 1, inventarios))
             throw new IllegalStateException(
-                    "No se puede publicar un producto fÃ­sico sin existencias disponibles.");
+                    "No se puede publicar un producto físico sin existencias disponibles.");
 
         producto.publicar();
     }

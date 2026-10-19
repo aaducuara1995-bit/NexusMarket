@@ -10,12 +10,12 @@ public class GeneracionReembolsoService {
 
     public Reembolso generar(Devolucion devolucion, List<Reembolso> existentes) {
         if (devolucion == null)
-            throw new IllegalArgumentException("La devoluciÃ³n es obligatoria.");
+            throw new IllegalArgumentException("La devolución es obligatoria.");
         if (existentes == null)
             throw new IllegalArgumentException("La lista de reembolsos existentes es obligatoria.");
 
         if (!devolucion.estaAprobada())
-            throw new IllegalStateException("Solo se genera el reembolso de una devoluciÃ³n aprobada.");
+            throw new IllegalStateException("Solo se genera el reembolso de una devolución aprobada.");
 
         Pedido pedido = devolucion.getPedido();
         boolean yaReembolsado = existentes.stream()
@@ -23,7 +23,7 @@ public class GeneracionReembolsoService {
         if (yaReembolsado)
             throw new IllegalStateException("El pedido ya tiene un reembolso.");
 
-        // La devoluciÃ³n cubre el pedido completo, asÃ­ que se reembolsa su total.
+        // La devolución cubre el pedido completo, así que se reembolsa su total.
         return new Reembolso(pedido, pedido.calcularTotal());
     }
 }

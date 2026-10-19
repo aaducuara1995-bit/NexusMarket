@@ -12,7 +12,7 @@ public class ProcesamientoPagoService {
 
     public ProcesamientoPagoService(ValidacionCompradorService validacionComprador) {
         if (validacionComprador == null)
-            throw new IllegalArgumentException("El servicio de validaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de validación es obligatorio.");
         this.validacionComprador = validacionComprador;
     }
 

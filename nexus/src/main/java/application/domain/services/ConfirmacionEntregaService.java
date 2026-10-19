@@ -13,7 +13,7 @@ public class ConfirmacionEntregaService {
 
     public ConfirmacionEntregaService(AutorizacionService autorizacion) {
         if (autorizacion == null)
-            throw new IllegalArgumentException("El servicio de autorizaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de autorización es obligatorio.");
         this.autorizacion = autorizacion;
     }
 
@@ -22,12 +22,12 @@ public class ConfirmacionEntregaService {
         if (pedido == null)
             throw new IllegalArgumentException("El pedido es obligatorio.");
         if (envio == null)
-            throw new IllegalArgumentException("El envÃ­o es obligatorio.");
+            throw new IllegalArgumentException("El envío es obligatorio.");
 
         if (!envio.getPedido().getId().equals(pedido.getId()))
-            throw new IllegalArgumentException("El envÃ­o no corresponde al pedido.");
+            throw new IllegalArgumentException("El envío no corresponde al pedido.");
         if (envio.getEstado() != EstadoEnvio.Despachado)
-            throw new IllegalStateException("Solo se confirma la entrega de un envÃ­o despachado.");
+            throw new IllegalStateException("Solo se confirma la entrega de un envío despachado.");
         if (pedido.getEstado() != EstadoPedido.Despachado)
             throw new IllegalStateException("El pedido debe estar despachado.");
 

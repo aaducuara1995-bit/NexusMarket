@@ -12,23 +12,23 @@ public class CreacionEnvioService {
         if (pedido == null)
             throw new IllegalArgumentException("El pedido es obligatorio.");
         if (direccionEntrega == null)
-            throw new IllegalArgumentException("La direcciÃ³n de entrega es obligatoria.");
+            throw new IllegalArgumentException("La dirección de entrega es obligatoria.");
         if (existentes == null)
-            throw new IllegalArgumentException("La lista de envÃ­os existentes es obligatoria.");
+            throw new IllegalArgumentException("La lista de envíos existentes es obligatoria.");
 
-        // Los envÃ­os son procesos logÃ­sticos solo para productos fÃ­sicos.
+        // Los envíos son procesos logísticos solo para productos físicos.
         if (pedido.esSoloDigital())
-            throw new IllegalStateException("Los pedidos de productos digitales no llevan envÃ­o.");
+            throw new IllegalStateException("Los pedidos de productos digitales no llevan envío.");
 
         if (!pedido.getComprador().tieneDireccion(direccionEntrega))
-            throw new IllegalArgumentException("La direcciÃ³n de entrega no pertenece al comprador.");
+            throw new IllegalArgumentException("La dirección de entrega no pertenece al comprador.");
 
         boolean yaTieneEnvio = existentes.stream()
                 .anyMatch(e -> e.getPedido().getId().equals(pedido.getId()));
         if (yaTieneEnvio)
-            throw new IllegalStateException("El pedido ya tiene un envÃ­o.");
+            throw new IllegalStateException("El pedido ya tiene un envío.");
 
-        // El propio envÃ­o exige que el pedido estÃ© pagado.
+        // El propio envío exige que el pedido esté pagado.
         return new Envio(pedido, direccionEntrega);
     }
 }

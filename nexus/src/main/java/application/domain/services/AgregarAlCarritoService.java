@@ -17,7 +17,7 @@ public class AgregarAlCarritoService {
 
     public AgregarAlCarritoService(ValidacionCompradorService validacionComprador) {
         if (validacionComprador == null)
-            throw new IllegalArgumentException("El servicio de validaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de validación es obligatorio.");
         this.validacionComprador = validacionComprador;
     }
 
@@ -43,7 +43,7 @@ public class AgregarAlCarritoService {
                 .mapToInt(ItemCarrito::getCantidad)
                 .sum();
 
-        // Agregar al carrito no reserva stock, pero no se acepta pedir mÃ¡s de lo que existe.
+        // Agregar al carrito no reserva stock, pero no se acepta pedir más de lo que existe.
         if (!consulta.hayDisponibilidad(producto, yaEnElCarrito + cantidad, inventarios))
             throw new IllegalStateException(
                     "No hay existencias suficientes de " + producto.getNombre() + ".");

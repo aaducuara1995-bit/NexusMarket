@@ -12,7 +12,7 @@ public class ProcesamientoReembolsoService {
 
     public ProcesamientoReembolsoService(AutorizacionService autorizacion) {
         if (autorizacion == null)
-            throw new IllegalArgumentException("El servicio de autorizaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de autorización es obligatorio.");
         this.autorizacion = autorizacion;
     }
 

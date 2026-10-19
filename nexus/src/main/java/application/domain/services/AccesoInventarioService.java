@@ -14,14 +14,14 @@ public class AccesoInventarioService {
     public AccesoInventarioService(AutorizacionService autorizacion,
                                    ValidacionVendedorService validacionVendedor) {
         if (autorizacion == null || validacionVendedor == null)
-            throw new IllegalArgumentException("Los servicios de validaciÃ³n son obligatorios.");
+            throw new IllegalArgumentException("Los servicios de validación son obligatorios.");
         this.autorizacion = autorizacion;
         this.validacionVendedor = validacionVendedor;
     }
 
     /**
      * El vendedor solo administra el inventario de sus propios productos.
-     * El operador logÃ­stico opera las bodegas y no necesita ser dueÃ±o del producto.
+     * El operador logístico opera las bodegas y no necesita ser dueño del producto.
      */
     public void exigirAcceso(Usuario actor, Vendedor vendedor, Producto producto) {
         autorizacion.exigirPermiso(actor, ProcesoNegocio.AdministracionInventario);

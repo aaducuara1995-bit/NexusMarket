@@ -17,7 +17,7 @@ public class IncorporacionVendedorService {
 
     public IncorporacionVendedorService(AutorizacionService autorizacion) {
         if (autorizacion == null)
-            throw new IllegalArgumentException("El servicio de autorizaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de autorización es obligatorio.");
         this.autorizacion = autorizacion;
     }
 
@@ -27,7 +27,7 @@ public class IncorporacionVendedorService {
                                 TipoBodega tipoBodega,
                                 Direccion direccionBodega) {
         // Los vendedores no se auto-registran: los incorpora un administrador,
-        // junto con su primera bodega (flujo 6.1 de la especificaciÃ³n).
+        // junto con su primera bodega (flujo 6.1 de la especificación).
         autorizacion.exigirPermiso(administrador, ProcesoNegocio.RegistroVendedores);
         autorizacion.exigirPermiso(administrador, ProcesoNegocio.AdministracionBodegas);
 

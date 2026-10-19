@@ -16,7 +16,7 @@ public class CambioEstadoProductoService {
     public CambioEstadoProductoService(AutorizacionService autorizacion,
                                        ValidacionVendedorService validacionVendedor) {
         if (autorizacion == null || validacionVendedor == null)
-            throw new IllegalArgumentException("Los servicios de validaciÃ³n son obligatorios.");
+            throw new IllegalArgumentException("Los servicios de validación son obligatorios.");
         this.autorizacion = autorizacion;
         this.validacionVendedor = validacionVendedor;
     }

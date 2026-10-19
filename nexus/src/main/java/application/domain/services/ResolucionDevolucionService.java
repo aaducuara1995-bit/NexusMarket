@@ -12,7 +12,7 @@ public class ResolucionDevolucionService {
 
     public ResolucionDevolucionService(AutorizacionService autorizacion) {
         if (autorizacion == null)
-            throw new IllegalArgumentException("El servicio de autorizaciÃ³n es obligatorio.");
+            throw new IllegalArgumentException("El servicio de autorización es obligatorio.");
         this.autorizacion = autorizacion;
     }
 
@@ -28,10 +28,10 @@ public class ResolucionDevolucionService {
 
     private void validar(Usuario actor, Devolucion devolucion) {
         autorizacion.exigirPermiso(actor, ProcesoNegocio.GestionDevoluciones);
-        // El comprador solicita, pero no puede resolver su propia devoluciÃ³n.
+        // El comprador solicita, pero no puede resolver su propia devolución.
         if (!actor.tieneRol(RolUsuario.Administrador))
             throw new AccesoDenegadoException("Solo un administrador puede resolver devoluciones.");
         if (devolucion == null)
-            throw new IllegalArgumentException("La devoluciÃ³n es obligatoria.");
+            throw new IllegalArgumentException("La devolución es obligatoria.");
     }
 }

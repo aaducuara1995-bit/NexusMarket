@@ -25,11 +25,11 @@ public class ReintegroInventarioService {
         if (inventario == null)
             throw new IllegalArgumentException("El inventario es obligatorio.");
         if (devolucion == null)
-            throw new IllegalArgumentException("La devoluciÃ³n es obligatoria.");
+            throw new IllegalArgumentException("La devolución es obligatoria.");
         acceso.exigirAcceso(actor, vendedor, inventario.getProducto());
 
         if (devolucion.getEstado() != EstadoDevolucion.Aprobada)
-            throw new IllegalStateException("Solo se reintegra inventario de una devoluciÃ³n aprobada.");
+            throw new IllegalStateException("Solo se reintegra inventario de una devolución aprobada.");
         if (unidades <= 0)
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
 
@@ -37,16 +37,16 @@ public class ReintegroInventarioService {
         if (devolucion.unidadesCompradas(productoId) == 0)
             throw new IllegalArgumentException("El producto no pertenece al pedido devuelto.");
 
-        // La devoluciÃ³n recuerda lo ya reintegrado: no se devuelven unidades dos veces.
+        // La devolución recuerda lo ya reintegrado: no se devuelven unidades dos veces.
         if (unidades > devolucion.unidadesPendientesDeReintegro(productoId))
             throw new IllegalArgumentException(
-                    "No se pueden reintegrar mÃ¡s unidades de las compradas en el pedido.");
+                    "No se pueden reintegrar más unidades de las compradas en el pedido.");
 
         inventario.reintegrar(unidades);
         devolucion.registrarReintegro(productoId, unidades);
 
         return new MovimientoInventario(
                 inventario, TipoMovimientoInventario.Devolucion, unidades,
-                "DevoluciÃ³n del pedido " + devolucion.getPedido().getId());
+                "Devolución del pedido " + devolucion.getPedido().getId());
     }
 }

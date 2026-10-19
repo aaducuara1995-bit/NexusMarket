@@ -18,7 +18,7 @@ public class EmisionFacturaService {
         if (yaFacturado)
             throw new IllegalStateException("El pedido ya fue facturado.");
 
-        // La propia factura exige que el pedido estÃ© pagado y toma el total del pedido.
+        // La propia factura exige que el pedido esté pagado y toma el total del pedido.
         return new Factura(pedido);
     }
 }
