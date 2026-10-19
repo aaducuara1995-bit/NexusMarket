@@ -1,7 +1,10 @@
 package application.domain.services;
 
 import application.domain.entities.Bodega;
+import application.domain.entities.Carrito;
+import application.domain.entities.Comprador;
 import application.domain.entities.Inventario;
+import application.domain.entities.Pedido;
 import application.domain.entities.Producto;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
@@ -22,6 +25,10 @@ final class Fixtures {
     private Fixtures() {
     }
 
+    static Direccion direccion() {
+        return new Direccion("Calle 1 # 2-3", "Medellin", "Antioquia", "050001");
+    }
+
     static Usuario usuario(RolUsuario rol) {
         return new Usuario(
                 new NombreCompleto("Ana", "Perez"),
@@ -34,6 +41,10 @@ final class Fixtures {
         return new Vendedor(usuario.getId());
     }
 
+    static Comprador comprador(Usuario usuario) {
+        return new Comprador(usuario.getId(), direccion());
+    }
+
     static Producto producto(TipoProducto tipo) {
         return producto(UUID.randomUUID(), tipo);
     }
@@ -44,11 +55,24 @@ final class Fixtures {
     }
 
     static Bodega bodega() {
-        return Bodega.delMarketplace("Bodega central", TipoBodega.Fisica,
-                new Direccion("Calle 1 # 2-3", "Medellin", "Antioquia", "050001"));
+        return Bodega.delMarketplace("Bodega central", TipoBodega.Fisica, direccion());
     }
 
     static Inventario inventario(Producto producto, int cantidad) {
         return new Inventario(producto, bodega(), cantidad);
+    }
+
+    static Pedido pedidoEntregado(Producto producto, int cantidad) {
+        if (!producto.estaPublicado())
+            producto.publicar();
+
+        Carrito carrito = new Carrito(comprador(usuario(RolUsuario.Comprador)));
+        carrito.agregarProducto(producto, cantidad);
+
+        Pedido pedido = new Pedido(carrito);
+        pedido.pagar();
+        pedido.enviar();
+        pedido.finalizar();
+        return pedido;
     }
 }

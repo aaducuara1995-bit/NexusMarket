@@ -4,7 +4,6 @@ import application.domain.entities.Inventario;
 import application.domain.entities.Producto;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
-import application.domain.enums.EstadoInventario;
 import application.domain.enums.ProcesoNegocio;
 
 import java.util.List;
@@ -13,6 +12,7 @@ public class PublicacionProductoService {
 
     private final AutorizacionService autorizacion;
     private final ValidacionVendedorService validacionVendedor;
+    private final ConsultaDisponibilidadService consulta = new ConsultaDisponibilidadService();
 
     public PublicacionProductoService(AutorizacionService autorizacion,
                                       ValidacionVendedorService validacionVendedor) {
@@ -30,17 +30,9 @@ public class PublicacionProductoService {
             throw new IllegalArgumentException("La lista de inventarios es obligatoria.");
 
         // Los productos fÃ­sicos requieren existencias; los digitales no (se entregan tras el pago).
-        if (producto.esFisico()) {
-            int disponible = inventarios.stream()
-                    .filter(i -> i.getProducto().getId().equals(producto.getId()))
-                    .filter(i -> i.getEstado() == EstadoInventario.Disponible)
-                    .mapToInt(Inventario::getDisponible)
-                    .sum();
-
-            if (disponible <= 0)
-                throw new IllegalStateException(
-                        "No se puede publicar un producto fÃ­sico sin existencias disponibles.");
-        }
+        if (producto.esFisico() && !consulta.hayDisponibilidad(producto, 1, inventarios))
+            throw new IllegalStateException(
+                    "No se puede publicar un producto fÃ­sico sin existencias disponibles.");
 
         producto.publicar();
     }
