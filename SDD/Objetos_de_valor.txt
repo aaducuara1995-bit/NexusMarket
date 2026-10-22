@@ -1,16 +1,20 @@
-Los Objetos de Valor de NexusMarket representan elementos del negocio que se caracterizan principalmente por su valor y significado, y no por tener una identidad propia. Estos objetos permiten organizar información que debe cumplir determinadas reglas de negocio y ayudan a mantener la integridad de los datos dentro del sistema.
+Los Objetos de Valor de NexusMarket representan datos del negocio que importan por su contenido y no por tener una identidad propia. Dos objetos de valor con los mismos datos se consideran iguales, y cada uno valida sus reglas al momento de crearse, así que nunca existe un correo mal escrito o un monto negativo dentro del sistema.
 
-Para su construcción se aplican conceptos de Programación Orientada a Objetos y principios de Diseño Dirigido por el Dominio, permitiendo encapsular datos relacionados con las diferentes operaciones que realiza la plataforma Marketplace.
+Para su construcción se aplican conceptos de Programación Orientada a Objetos y principios de Diseño Dirigido por el Dominio. En el código se implementan como records de Java, que son inmutables: una vez creados, sus datos no cambian.
 
-El modelo contempla principalmente los siguientes Objetos de Valor:
+El modelo contempla los siguientes Objetos de Valor:
 
-•	Correo Electrónico, representa la dirección de correo utilizada por los usuarios y otros actores del sistema. Permite validar que el formato del correo sea correcto.
-•	Dinero, representa los valores monetarios utilizados en el sistema, como precios de productos, subtotales, descuentos, impuestos, costos de envío y totales de las compras.
-•	Dirección, representa la información necesaria para identificar un lugar de residencia, entrega o ubicación de un usuario, vendedor o pedido. Puede contener datos como ciudad, dirección, barrio y código postal.
-•	Nombre, representa los nombres y apellidos de las personas registradas en el sistema, permitiendo mantener esta información organizada y validada.
+•	CorreoElectronico, representa el correo con el que un usuario accede y se comunica. Valida el formato y lo guarda en minúsculas, de modo que "Ana@Correo.com" y "ana@correo.com" se reconocen como el mismo correo. Se usa para comprobar que no haya dos usuarios con el mismo correo.
+•	DocumentoIdentidad, representa el documento de identidad de un usuario. No puede estar vacío y solo acepta números. Junto con el correo, debe ser único en la plataforma.
+•	NombreCompleto, representa los nombres y los apellidos de una persona registrada. Ambos son obligatorios.
+•	Dinero, representa un valor monetario con su monto y su moneda (pesos colombianos, COP, por defecto). No admite montos negativos y siempre maneja dos decimales, para que dos valores iguales se comparen sin errores de redondeo. Se usa en precios, subtotales, totales de pedidos, facturas, pagos y reembolsos.
+•	Direccion, representa una ubicación con calle, ciudad, departamento y código postal, todos obligatorios. Se usa en las direcciones del comprador, en las bodegas físicas y en el destino de los envíos.
 
-ValueObjects
+De esta forma, los objetos de valor concentran las validaciones de los datos básicos en un solo lugar, y las entidades los reciben ya verificados.
+
+valueobjects
 ├── CorreoElectronico
+├── DocumentoIdentidad
+├── NombreCompleto
 ├── Dinero
-├── Direccion
-└── Nombre
+└── Direccion
