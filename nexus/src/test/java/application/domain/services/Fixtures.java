@@ -1,21 +1,21 @@
 package application.domain.services;
 
-import application.domain.entities.Bodega;
-import application.domain.entities.Carrito;
-import application.domain.entities.Comprador;
-import application.domain.entities.Inventario;
-import application.domain.entities.Pedido;
-import application.domain.entities.Producto;
-import application.domain.entities.Usuario;
-import application.domain.entities.Vendedor;
-import application.domain.enums.RolUsuario;
-import application.domain.enums.TipoBodega;
-import application.domain.enums.TipoProducto;
-import application.domain.valueobjects.CorreoElectronico;
-import application.domain.valueobjects.Dinero;
-import application.domain.valueobjects.Direccion;
-import application.domain.valueobjects.DocumentoIdentidad;
-import application.domain.valueobjects.NombreCompleto;
+import application.domain.entities.Buyer;
+import application.domain.entities.Cart;
+import application.domain.entities.Inventory;
+import application.domain.entities.Order;
+import application.domain.entities.Product;
+import application.domain.entities.Seller;
+import application.domain.entities.User;
+import application.domain.entities.Warehouse;
+import application.domain.enums.ProductType;
+import application.domain.enums.UserRole;
+import application.domain.enums.WarehouseType;
+import application.domain.valueobjects.Address;
+import application.domain.valueobjects.Email;
+import application.domain.valueobjects.FullName;
+import application.domain.valueobjects.IdentityDocument;
+import application.domain.valueobjects.Money;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -25,54 +25,54 @@ final class Fixtures {
     private Fixtures() {
     }
 
-    static Direccion direccion() {
-        return new Direccion("Calle 1 # 2-3", "Medellin", "Antioquia", "050001");
+    static Address address() {
+        return new Address("Calle 1 # 2-3", "Medellin", "Antioquia", "050001");
     }
 
-    static Usuario usuario(RolUsuario rol) {
-        return new Usuario(
-                new NombreCompleto("Ana", "Perez"),
-                new CorreoElectronico("ana@correo.com"),
-                new DocumentoIdentidad("123456"),
-                rol);
+    static User user(UserRole role) {
+        return new User(
+                new FullName("Ana", "Perez"),
+                new Email("ana@mail.com"),
+                new IdentityDocument("123456"),
+                role);
     }
 
-    static Vendedor vendedor(Usuario usuario) {
-        return new Vendedor(usuario.getId());
+    static Seller seller(User user) {
+        return new Seller(user.getId());
     }
 
-    static Comprador comprador(Usuario usuario) {
-        return new Comprador(usuario.getId(), direccion());
+    static Buyer buyer(User user) {
+        return new Buyer(user.getId(), address());
     }
 
-    static Producto producto(TipoProducto tipo) {
-        return producto(UUID.randomUUID(), tipo);
+    static Product product(ProductType type) {
+        return product(UUID.randomUUID(), type);
     }
 
-    static Producto producto(UUID vendedorId, TipoProducto tipo) {
-        return new Producto(vendedorId, "Camiseta", "Algodon", tipo,
-                new Dinero(new BigDecimal("45000")));
+    static Product product(UUID sellerId, ProductType type) {
+        return new Product(sellerId, "T-shirt", "Cotton", type,
+                new Money(new BigDecimal("45000")));
     }
 
-    static Bodega bodega() {
-        return Bodega.delMarketplace("Bodega central", TipoBodega.Fisica, direccion());
+    static Warehouse warehouse() {
+        return Warehouse.ofMarketplace("Central warehouse", WarehouseType.PHYSICAL, address());
     }
 
-    static Inventario inventario(Producto producto, int cantidad) {
-        return new Inventario(producto, bodega(), cantidad);
+    static Inventory inventory(Product product, int quantity) {
+        return new Inventory(product, warehouse(), quantity);
     }
 
-    static Pedido pedidoEntregado(Producto producto, int cantidad) {
-        if (!producto.estaPublicado())
-            producto.publicar();
+    static Order deliveredOrder(Product product, int quantity) {
+        if (!product.isPublished())
+            product.publish();
 
-        Carrito carrito = new Carrito(comprador(usuario(RolUsuario.Comprador)));
-        carrito.agregarProducto(producto, cantidad);
+        Cart cart = new Cart(buyer(user(UserRole.BUYER)));
+        cart.addProduct(product, quantity);
 
-        Pedido pedido = new Pedido(carrito);
-        pedido.pagar();
-        pedido.enviar();
-        pedido.finalizar();
-        return pedido;
+        Order order = new Order(cart);
+        order.pay();
+        order.ship();
+        order.complete();
+        return order;
     }
 }
