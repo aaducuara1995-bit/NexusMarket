@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.RegistrarProductoUseCase;
+
 import application.domain.entities.Producto;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
@@ -8,7 +10,7 @@ import application.domain.enums.TipoProducto;
 import application.domain.ports.out.ProductoRepositorioPort;
 import application.domain.valueobjects.Dinero;
 
-public class RegistroProductoService {
+public class RegistroProductoService implements RegistrarProductoUseCase {
 
     private final AutorizacionService autorizacion;
     private final ValidacionVendedorService validacionVendedor;

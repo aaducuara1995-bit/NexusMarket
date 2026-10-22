@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.SolicitarDevolucionUseCase;
+
 import application.domain.entities.Comprador;
 import application.domain.entities.Devolucion;
 import application.domain.entities.Pedido;
@@ -10,7 +12,7 @@ import application.domain.exceptions.AccesoDenegadoException;
 
 import java.util.List;
 
-public class SolicitudDevolucionService {
+public class SolicitudDevolucionService implements SolicitarDevolucionUseCase {
 
     private final AutorizacionService autorizacion;
 

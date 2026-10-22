@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.RegistrarUsuarioUseCase;
+
 import application.domain.entities.Usuario;
 import application.domain.enums.ProcesoNegocio;
 import application.domain.enums.RolUsuario;
@@ -9,7 +11,7 @@ import application.domain.valueobjects.CorreoElectronico;
 import application.domain.valueobjects.DocumentoIdentidad;
 import application.domain.valueobjects.NombreCompleto;
 
-public class RegistroUsuarioService {
+public class RegistroUsuarioService implements RegistrarUsuarioUseCase {
 
     private final AutorizacionService autorizacion;
     private final UsuarioRepositorioPort usuarios;

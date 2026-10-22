@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.PublicarProductoUseCase;
+
 import application.domain.entities.Inventario;
 import application.domain.entities.Producto;
 import application.domain.entities.Usuario;
@@ -8,7 +10,7 @@ import application.domain.enums.ProcesoNegocio;
 
 import java.util.List;
 
-public class PublicacionProductoService {
+public class PublicacionProductoService implements PublicarProductoUseCase {
 
     private final AutorizacionService autorizacion;
     private final ValidacionVendedorService validacionVendedor;

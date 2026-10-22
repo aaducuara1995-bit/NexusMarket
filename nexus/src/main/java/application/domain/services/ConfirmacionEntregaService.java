@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.ConfirmarEntregaUseCase;
+
 import application.domain.entities.Envio;
 import application.domain.entities.Pedido;
 import application.domain.entities.Usuario;
@@ -7,7 +9,7 @@ import application.domain.enums.EstadoEnvio;
 import application.domain.enums.EstadoPedido;
 import application.domain.enums.ProcesoNegocio;
 
-public class ConfirmacionEntregaService {
+public class ConfirmacionEntregaService implements ConfirmarEntregaUseCase {
 
     private final AutorizacionService autorizacion;
 

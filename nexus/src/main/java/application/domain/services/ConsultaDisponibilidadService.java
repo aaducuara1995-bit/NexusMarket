@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.ConsultarDisponibilidadUseCase;
+
 import application.domain.entities.Inventario;
 import application.domain.entities.Producto;
 import application.domain.enums.EstadoInventario;
 
 import java.util.List;
 
-public class ConsultaDisponibilidadService {
+public class ConsultaDisponibilidadService implements ConsultarDisponibilidadUseCase {
 
     public int disponibleDe(Producto producto, List<Inventario> inventarios) {
         validar(producto, inventarios);

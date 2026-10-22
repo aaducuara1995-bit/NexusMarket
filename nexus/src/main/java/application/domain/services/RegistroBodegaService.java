@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.RegistrarBodegaUseCase;
+
 import application.domain.entities.Bodega;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
@@ -8,7 +10,7 @@ import application.domain.enums.TipoBodega;
 import application.domain.ports.out.BodegaRepositorioPort;
 import application.domain.valueobjects.Direccion;
 
-public class RegistroBodegaService {
+public class RegistroBodegaService implements RegistrarBodegaUseCase {
 
     private final AutorizacionService autorizacion;
     private final BodegaRepositorioPort bodegas;

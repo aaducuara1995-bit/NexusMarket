@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.ConfirmarPedidoUseCase;
+
 import application.domain.entities.Carrito;
 import application.domain.entities.Comprador;
 import application.domain.entities.Inventario;
@@ -13,7 +15,7 @@ import application.domain.exceptions.AccesoDenegadoException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfirmacionPedidoService {
+public class ConfirmacionPedidoService implements ConfirmarPedidoUseCase {
 
     public record Resultado(Pedido pedido,
                             List<ReservaInventario> reservas,

@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.RegistrarInventarioInicialUseCase;
+
 import application.domain.entities.Bodega;
 import application.domain.entities.Inventario;
 import application.domain.entities.MovimientoInventario;
@@ -13,7 +15,7 @@ import application.domain.exceptions.AccesoDenegadoException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegistroInventarioInicialService {
+public class RegistroInventarioInicialService implements RegistrarInventarioInicialUseCase {
 
     public record Resultado(Inventario inventario, List<MovimientoInventario> movimientos) {
     }

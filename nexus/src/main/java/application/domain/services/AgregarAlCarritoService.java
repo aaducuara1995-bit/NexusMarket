@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.AgregarAlCarritoUseCase;
+
 import application.domain.entities.Carrito;
 import application.domain.entities.Comprador;
 import application.domain.entities.Inventario;
@@ -10,7 +12,7 @@ import application.domain.exceptions.AccesoDenegadoException;
 
 import java.util.List;
 
-public class AgregarAlCarritoService {
+public class AgregarAlCarritoService implements AgregarAlCarritoUseCase {
 
     private final ValidacionCompradorService validacionComprador;
     private final ConsultaDisponibilidadService consulta = new ConsultaDisponibilidadService();

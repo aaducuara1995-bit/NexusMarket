@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.ReintegrarInventarioUseCase;
+
 import application.domain.entities.Devolucion;
 import application.domain.entities.Inventario;
 import application.domain.entities.MovimientoInventario;
@@ -10,7 +12,7 @@ import application.domain.enums.TipoMovimientoInventario;
 
 import java.util.UUID;
 
-public class ReintegroInventarioService {
+public class ReintegroInventarioService implements ReintegrarInventarioUseCase {
 
     private final AccesoInventarioService acceso;
 

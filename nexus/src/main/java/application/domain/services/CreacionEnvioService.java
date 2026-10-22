@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.CrearEnvioUseCase;
+
 import application.domain.entities.Envio;
 import application.domain.entities.Pedido;
 import application.domain.valueobjects.Direccion;
 
 import java.util.List;
 
-public class CreacionEnvioService {
+public class CreacionEnvioService implements CrearEnvioUseCase {
 
     public Envio crear(Pedido pedido, Direccion direccionEntrega, List<Envio> existentes) {
         if (pedido == null)

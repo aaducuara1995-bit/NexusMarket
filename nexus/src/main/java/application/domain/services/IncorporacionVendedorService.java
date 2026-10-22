@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.IncorporarVendedorUseCase;
+
 import application.domain.entities.Bodega;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
@@ -8,7 +10,7 @@ import application.domain.enums.RolUsuario;
 import application.domain.enums.TipoBodega;
 import application.domain.valueobjects.Direccion;
 
-public class IncorporacionVendedorService {
+public class IncorporacionVendedorService implements IncorporarVendedorUseCase {
 
     public record Resultado(Vendedor vendedor, Bodega bodega) {
     }

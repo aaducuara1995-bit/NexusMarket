@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.RegistrarVendedorUseCase;
+
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
 import application.domain.enums.ProcesoNegocio;
 import application.domain.enums.RolUsuario;
 import application.domain.ports.out.VendedorRepositorioPort;
 
-public class RegistroVendedorService {
+public class RegistroVendedorService implements RegistrarVendedorUseCase {
 
     private final AutorizacionService autorizacion;
     private final VendedorRepositorioPort vendedores;

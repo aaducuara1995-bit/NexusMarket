@@ -1,5 +1,7 @@
 package application.domain.services;
 
+import application.domain.ports.in.DespacharPedidoUseCase;
+
 import application.domain.entities.Envio;
 import application.domain.entities.MovimientoInventario;
 import application.domain.entities.Pedido;
@@ -11,7 +13,7 @@ import application.domain.enums.ProcesoNegocio;
 
 import java.util.List;
 
-public class DespachoService {
+public class DespachoService implements DespacharPedidoUseCase {
 
     private final AutorizacionService autorizacion;
     private final SalidaInventarioService salidaInventario;

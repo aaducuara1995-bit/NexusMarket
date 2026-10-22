@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.ProcesarReembolsoUseCase;
+
 import application.domain.entities.Reembolso;
 import application.domain.entities.Usuario;
 import application.domain.enums.ProcesoNegocio;
 import application.domain.enums.RolUsuario;
 import application.domain.exceptions.AccesoDenegadoException;
 
-public class ProcesamientoReembolsoService {
+public class ProcesamientoReembolsoService implements ProcesarReembolsoUseCase {
 
     private final AutorizacionService autorizacion;
 

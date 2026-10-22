@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.GenerarReembolsoUseCase;
+
 import application.domain.entities.Devolucion;
 import application.domain.entities.Pedido;
 import application.domain.entities.Reembolso;
 
 import java.util.List;
 
-public class GeneracionReembolsoService {
+public class GeneracionReembolsoService implements GenerarReembolsoUseCase {
 
     public Reembolso generar(Devolucion devolucion, List<Reembolso> existentes) {
         if (devolucion == null)

@@ -1,9 +1,11 @@
 package application.domain.services;
 
+import application.domain.ports.in.EntregarPedidoDigitalUseCase;
+
 import application.domain.entities.Pedido;
 import application.domain.enums.EstadoPedido;
 
-public class EntregaDigitalService {
+public class EntregaDigitalService implements EntregarPedidoDigitalUseCase {
 
     /**
      * Los productos digitales se entregan de inmediato tras el pago, sin pasar por logística.

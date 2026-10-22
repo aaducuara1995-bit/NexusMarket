@@ -1,10 +1,12 @@
 package application.domain.services;
 
+import application.domain.ports.in.MarcarInventarioUseCase;
+
 import application.domain.entities.Inventario;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
 
-public class MarcadoInventarioService {
+public class MarcadoInventarioService implements MarcarInventarioUseCase {
 
     private final AccesoInventarioService acceso;
 

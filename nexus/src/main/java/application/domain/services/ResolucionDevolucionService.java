@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.ResolverDevolucionUseCase;
+
 import application.domain.entities.Devolucion;
 import application.domain.entities.Usuario;
 import application.domain.enums.ProcesoNegocio;
 import application.domain.enums.RolUsuario;
 import application.domain.exceptions.AccesoDenegadoException;
 
-public class ResolucionDevolucionService {
+public class ResolucionDevolucionService implements ResolverDevolucionUseCase {
 
     private final AutorizacionService autorizacion;
 

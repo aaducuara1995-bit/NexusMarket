@@ -1,11 +1,13 @@
 package application.domain.services;
 
+import application.domain.ports.in.EmitirFacturaUseCase;
+
 import application.domain.entities.Factura;
 import application.domain.entities.Pedido;
 
 import java.util.List;
 
-public class EmisionFacturaService {
+public class EmisionFacturaService implements EmitirFacturaUseCase {
 
     public Factura emitir(Pedido pedido, List<Factura> existentes) {
         if (pedido == null)

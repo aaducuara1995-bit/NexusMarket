@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.AjustarInventarioUseCase;
+
 import application.domain.entities.Inventario;
 import application.domain.entities.MovimientoInventario;
 import application.domain.entities.Usuario;
 import application.domain.entities.Vendedor;
 import application.domain.enums.TipoMovimientoInventario;
 
-public class AjusteInventarioService {
+public class AjusteInventarioService implements AjustarInventarioUseCase {
 
     private final AccesoInventarioService acceso;
 

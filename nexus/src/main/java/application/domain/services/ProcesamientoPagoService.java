@@ -1,12 +1,14 @@
 package application.domain.services;
 
+import application.domain.ports.in.PagarPedidoUseCase;
+
 import application.domain.entities.Comprador;
 import application.domain.entities.Pedido;
 import application.domain.entities.Usuario;
 import application.domain.exceptions.AccesoDenegadoException;
 import application.domain.valueobjects.Dinero;
 
-public class ProcesamientoPagoService {
+public class ProcesamientoPagoService implements PagarPedidoUseCase {
 
     private final ValidacionCompradorService validacionComprador;
 
