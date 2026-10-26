@@ -3,15 +3,18 @@ package application.adapters.useCases;
 import application.domain.entities.Buyer;
 import application.domain.entities.Product;
 import application.domain.entities.User;
+import application.domain.enums.AuditOperation;
 import application.domain.ports.in.PublicAccessPort;
 import application.domain.ports.out.InventoryRepositoryPort;
 import application.domain.ports.out.ProductRepositoryPort;
 import application.domain.services.CheckAvailabilityService;
+import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterBuyerService;
 import application.domain.services.RegisterUserService;
 import application.domain.valueobjects.Address;
 
 import java.util.List;
+import java.util.Map;
 
 /** Operations anyone can use without signing in: buyer sign-up and the public catalog. */
 public class PublicAccessUseCaseImpl implements PublicAccessPort {
@@ -21,17 +24,20 @@ public class PublicAccessUseCaseImpl implements PublicAccessPort {
     private final CheckAvailabilityService checkAvailabilityService;
     private final ProductRepositoryPort productRepository;
     private final InventoryRepositoryPort inventoryRepository;
+    private final RegisterAuditLogService auditLogService;
 
     public PublicAccessUseCaseImpl(RegisterUserService registerUserService,
                                    RegisterBuyerService registerBuyerService,
                                    CheckAvailabilityService checkAvailabilityService,
                                    ProductRepositoryPort productRepository,
-                                   InventoryRepositoryPort inventoryRepository) {
+                                   InventoryRepositoryPort inventoryRepository,
+                                   RegisterAuditLogService auditLogService) {
         this.registerUserService = registerUserService;
         this.registerBuyerService = registerBuyerService;
         this.checkAvailabilityService = checkAvailabilityService;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -43,7 +49,10 @@ public class PublicAccessUseCaseImpl implements PublicAccessPort {
         // Without an actor, RegisterUserService only accepts the BUYER role.
         User saved = registerUserService.register(null, user.getFullName(), user.getEmail(),
                 user.getDocument(), user.getRole());
-        return registerBuyerService.register(saved, mainAddress);
+        Buyer buyer = registerBuyerService.register(saved, mainAddress);
+        auditLogService.register(AuditOperation.USER_REGISTRATION, saved, saved.getId(),
+                Map.of("role", saved.getRole().name(), "channel", "public sign-up"));
+        return buyer;
     }
 
     @Override

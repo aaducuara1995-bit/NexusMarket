@@ -30,16 +30,17 @@ Use Case Adapter (adapters/useCases)
 
 | Puerto | Clase | Servicios inyectados | Repositorios inyectados |
 |---|---|---|---|
-| `PublicAccessPort` | `PublicAccessUseCaseImpl` | `RegisterUserService`, `RegisterBuyerService`, `CheckAvailabilityService` | `ProductRepositoryPort`, `InventoryRepositoryPort` |
-| `BuyerPort` | `BuyerUseCaseImpl` | `AuthorizationService`, `AddToCartService`, `ConfirmOrderService`, `PayOrderService`, `IssueInvoiceService`, `DeliverDigitalOrderService`, `CreateShipmentService`, `RequestReturnService` | `BuyerRepositoryPort`, `CartRepositoryPort`, `ProductRepositoryPort`, `InventoryRepositoryPort`, `InventoryReservationRepositoryPort`, `InventoryMovementRepositoryPort`, `OrderRepositoryPort`, `InvoiceRepositoryPort`, `ShipmentRepositoryPort`, `ReturnRequestRepositoryPort` |
-| `SellerPort` | `SellerUseCaseImpl` | `AuthorizationService`, `RegisterProductService`, `PublishProductService`, `ChangeProductStatusService`, `InventoryOperationsSupport` | `SellerRepositoryPort`, `ProductRepositoryPort`, `InventoryRepositoryPort` |
-| `LogisticOperatorPort` | `LogisticOperatorUseCaseImpl` | `AuthorizationService`, `ShipOrderService`, `ConfirmDeliveryService`, `InventoryOperationsSupport` | `OrderRepositoryPort`, `ShipmentRepositoryPort`, `InventoryReservationRepositoryPort`, `InventoryMovementRepositoryPort`, `InventoryRepositoryPort` |
-| `AdminPort` | `AdminUseCaseImpl` | `AuthorizationService`, `RegisterUserService`, `OnboardSellerService`, `RegisterWarehouseService`, `ResolveReturnService`, `GenerateRefundService`, `ProcessRefundService` | `UserRepositoryPort`, `SellerRepositoryPort`, `WarehouseRepositoryPort`, `ReturnRequestRepositoryPort`, `RefundRepositoryPort` |
-| `SupervisorPort` | `SupervisorUseCaseImpl` | `AuthorizationService` | `UserRepositoryPort`, `WarehouseRepositoryPort`, `InventoryRepositoryPort`, `OrderRepositoryPort` |
+| `PublicAccessPort` | `PublicAccessUseCaseImpl` | `RegisterUserService`, `RegisterBuyerService`, `CheckAvailabilityService`, `RegisterAuditLogService` | `ProductRepositoryPort`, `InventoryRepositoryPort` |
+| `BuyerPort` | `BuyerUseCaseImpl` | `AuthorizationService`, `AddToCartService`, `ConfirmOrderService`, `PayOrderService`, `IssueInvoiceService`, `DeliverDigitalOrderService`, `CreateShipmentService`, `RequestReturnService`, `RegisterAuditLogService` | `BuyerRepositoryPort`, `CartRepositoryPort`, `ProductRepositoryPort`, `InventoryRepositoryPort`, `InventoryReservationRepositoryPort`, `InventoryMovementRepositoryPort`, `OrderRepositoryPort`, `InvoiceRepositoryPort`, `ShipmentRepositoryPort`, `ReturnRequestRepositoryPort` |
+| `SellerPort` | `SellerUseCaseImpl` | `AuthorizationService`, `RegisterProductService`, `PublishProductService`, `ChangeProductStatusService`, `InventoryOperationsSupport`, `RegisterAuditLogService` | `SellerRepositoryPort`, `ProductRepositoryPort`, `InventoryRepositoryPort` |
+| `LogisticOperatorPort` | `LogisticOperatorUseCaseImpl` | `AuthorizationService`, `ShipOrderService`, `ConfirmDeliveryService`, `InventoryOperationsSupport`, `RegisterAuditLogService` | `OrderRepositoryPort`, `ShipmentRepositoryPort`, `InventoryReservationRepositoryPort`, `InventoryMovementRepositoryPort`, `InventoryRepositoryPort` |
+| `AdminPort` | `AdminUseCaseImpl` | `AuthorizationService`, `RegisterUserService`, `OnboardSellerService`, `RegisterWarehouseService`, `ResolveReturnService`, `GenerateRefundService`, `ProcessRefundService`, `RegisterAuditLogService`, `ConsultAuditLogService` | `UserRepositoryPort`, `SellerRepositoryPort`, `WarehouseRepositoryPort`, `ReturnRequestRepositoryPort`, `RefundRepositoryPort` |
+| `SupervisorPort` | `SupervisorUseCaseImpl` | `AuthorizationService`, `ConsultAuditLogService` | `UserRepositoryPort`, `WarehouseRepositoryPort`, `InventoryRepositoryPort`, `OrderRepositoryPort` |
 
 Clases de apoyo:
 
-* `InventoryOperationsSupport`: las seis operaciones de inventario que comparten el vendedor y el operador logístico. El vendedor envía su perfil de `Seller` para que se valide que el producto es suyo; el operador envía `null` porque puede operar sobre cualquier producto. Inyecta `RegisterInitialInventoryService`, `AdjustInventoryService`, `MarkInventoryService`, `RestockInventoryService`, `ProductRepositoryPort`, `WarehouseRepositoryPort`, `InventoryRepositoryPort`, `InventoryMovementRepositoryPort`, `ReturnRequestRepositoryPort`.
+* `InventoryOperationsSupport`: las seis operaciones de inventario que comparten el vendedor y el operador logístico. El vendedor envía su perfil de `Seller` para que se valide que el producto es suyo; el operador envía `null` porque puede operar sobre cualquier producto. Inyecta `RegisterInitialInventoryService`, `AdjustInventoryService`, `MarkInventoryService`, `RestockInventoryService`, `ProductRepositoryPort`, `WarehouseRepositoryPort`, `InventoryRepositoryPort`, `InventoryMovementRepositoryPort`, `ReturnRequestRepositoryPort`, `RegisterAuditLogService`.
+* `InventoryOperationsSupport` también deja el registro de auditoría de cada operación de inventario.
 * `Lookup`: recarga desde su repositorio cada objeto que llega a un caso de uso. La capa REST solo conoce identificadores, así que esto garantiza que el objeto existe y que se trabaja con el estado guardado. Si no existe, lanza `EntityNotFoundException`.
 
 ---
@@ -56,7 +57,8 @@ Algunas operaciones encadenan varios servicios de dominio. Estas son las decisio
 * **`AdminUseCaseImpl.approveReturn`.** Aprueba la devolución con `ResolveReturnService` y genera el reembolso con `GenerateRefundService`, que queda `PENDING` hasta que se procese.
 * **`AdminUseCaseImpl.blockUser`.** Exige `USER_MANAGEMENT` y no permite que un administrador se bloquee a sí mismo.
 * **`PublicAccessUseCaseImpl.registerBuyer`.** Crea el usuario con `RegisterUserService` (sin actor solo acepta el rol `BUYER`) y su perfil con `RegisterBuyerService`.
-* **`SupervisorUseCaseImpl`.** Todas sus consultas exigen `ADMINISTRATIVE_REPORTS`; ninguna modifica datos.
+* **`SupervisorUseCaseImpl`.** Todas sus consultas exigen `ADMINISTRATIVE_REPORTS`; ninguna modifica datos. También consulta la auditoría completa o la de un registro (`consultAuditLogOf`).
+* **Auditoría.** Cada operación que cambia datos termina llamando a `RegisterAuditLogService` con su `AuditOperation`, el usuario y el registro afectado. Se llama al final, así que una operación que falla no deja registro.
 
 ---
 

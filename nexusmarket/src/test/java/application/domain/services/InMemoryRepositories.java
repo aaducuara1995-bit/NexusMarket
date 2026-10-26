@@ -1,5 +1,6 @@
 package application.domain.services;
 
+import application.domain.entities.AuditLog;
 import application.domain.entities.Buyer;
 import application.domain.entities.Cart;
 import application.domain.entities.Inventory;
@@ -14,6 +15,7 @@ import application.domain.entities.Seller;
 import application.domain.entities.Shipment;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+import application.domain.ports.out.AuditLogRepositoryPort;
 import application.domain.ports.out.BuyerRepositoryPort;
 import application.domain.ports.out.CartRepositoryPort;
 import application.domain.ports.out.InventoryMovementRepositoryPort;
@@ -208,6 +210,18 @@ public final class InMemoryRepositories {
 
         public Optional<Refund> findByOrder(UUID orderId) {
             return first(r -> r.getOrder().getId().equals(orderId));
+        }
+    }
+
+    public static class AuditLogs extends Store<AuditLog> implements AuditLogRepositoryPort {
+        protected UUID idOf(AuditLog auditLog) { return auditLog.getId(); }
+
+        public List<AuditLog> findByUser(UUID userId) {
+            return where(a -> a.getPerformedByUserId().equals(userId));
+        }
+
+        public List<AuditLog> findByAffectedEntity(UUID entityId) {
+            return where(a -> a.getAffectedEntityId().equals(entityId));
         }
     }
 }

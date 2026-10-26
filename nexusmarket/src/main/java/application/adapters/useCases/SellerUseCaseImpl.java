@@ -6,6 +6,7 @@ import application.domain.entities.ReturnRequest;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+import application.domain.enums.AuditOperation;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
 import application.domain.exceptions.AccessDeniedException;
@@ -17,9 +18,11 @@ import application.domain.ports.out.SellerRepositoryPort;
 import application.domain.services.AuthorizationService;
 import application.domain.services.ChangeProductStatusService;
 import application.domain.services.PublishProductService;
+import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterProductService;
 
 import java.util.List;
+import java.util.Map;
 
 /** Operations of the SELLER role: their catalog and the inventory of their products. */
 public class SellerUseCaseImpl implements SellerPort {
@@ -32,6 +35,7 @@ public class SellerUseCaseImpl implements SellerPort {
     private final SellerRepositoryPort sellerRepository;
     private final ProductRepositoryPort productRepository;
     private final InventoryRepositoryPort inventoryRepository;
+    private final RegisterAuditLogService auditLogService;
 
     public SellerUseCaseImpl(AuthorizationService authorizationService,
                              RegisterProductService registerProductService,
@@ -40,7 +44,8 @@ public class SellerUseCaseImpl implements SellerPort {
                              InventoryOperationsSupport inventoryOperations,
                              SellerRepositoryPort sellerRepository,
                              ProductRepositoryPort productRepository,
-                             InventoryRepositoryPort inventoryRepository) {
+                             InventoryRepositoryPort inventoryRepository,
+                             RegisterAuditLogService auditLogService) {
         this.authorizationService = authorizationService;
         this.registerProductService = registerProductService;
         this.publishProductService = publishProductService;
@@ -49,6 +54,7 @@ public class SellerUseCaseImpl implements SellerPort {
         this.sellerRepository = sellerRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
+        this.auditLogService = auditLogService;
     }
 
     /** The product that arrives is a draft: the stored one always belongs to the signed-in seller. */
@@ -63,6 +69,8 @@ public class SellerUseCaseImpl implements SellerPort {
             product.getVariants().forEach(registered::addVariant);
             productRepository.save(registered);
         }
+        auditLogService.register(AuditOperation.PRODUCT_REGISTRATION, user, registered.getId(),
+                Map.of("name", registered.getName(), "type", registered.getType().name()));
         return registered;
     }
 
@@ -72,6 +80,7 @@ public class SellerUseCaseImpl implements SellerPort {
         Product stored = reload(product);
         publishProductService.publish(user, seller, stored, inventoryRepository.findByProduct(stored.getId()));
         productRepository.save(stored);
+        auditStatusChange(user, stored);
         return stored;
     }
 
@@ -81,6 +90,7 @@ public class SellerUseCaseImpl implements SellerPort {
         Product stored = reload(product);
         changeProductStatusService.suspend(user, seller, stored);
         productRepository.save(stored);
+        auditStatusChange(user, stored);
         return stored;
     }
 
@@ -91,6 +101,7 @@ public class SellerUseCaseImpl implements SellerPort {
         changeProductStatusService.discontinue(user, seller, stored,
                 inventoryRepository.findByProduct(stored.getId()));
         productRepository.save(stored);
+        auditStatusChange(user, stored);
         return stored;
     }
 
@@ -128,6 +139,11 @@ public class SellerUseCaseImpl implements SellerPort {
     @Override
     public Inventory restockFromReturn(User user, Inventory inventory, ReturnRequest returnRequest, int units) {
         return inventoryOperations.restockFromReturn(user, sellerOf(user), inventory, returnRequest, units);
+    }
+
+    private void auditStatusChange(User user, Product product) {
+        auditLogService.register(AuditOperation.PRODUCT_STATUS_CHANGE, user, product.getId(),
+                Map.of("status", product.getStatus().name()));
     }
 
     private Seller sellerOf(User user) {

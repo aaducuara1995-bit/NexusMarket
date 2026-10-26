@@ -7,6 +7,7 @@ import application.domain.entities.ReturnRequest;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+import application.domain.enums.AuditOperation;
 import application.domain.ports.out.InventoryMovementRepositoryPort;
 import application.domain.ports.out.InventoryRepositoryPort;
 import application.domain.ports.out.ProductRepositoryPort;
@@ -14,10 +15,12 @@ import application.domain.ports.out.ReturnRequestRepositoryPort;
 import application.domain.ports.out.WarehouseRepositoryPort;
 import application.domain.services.AdjustInventoryService;
 import application.domain.services.MarkInventoryService;
+import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterInitialInventoryService;
 import application.domain.services.RestockInventoryService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Inventory operations shared by the seller and the logistic operator. Both roles run
@@ -36,6 +39,7 @@ public class InventoryOperationsSupport {
     private final InventoryRepositoryPort inventoryRepository;
     private final InventoryMovementRepositoryPort movementRepository;
     private final ReturnRequestRepositoryPort returnRepository;
+    private final RegisterAuditLogService auditLogService;
 
     public InventoryOperationsSupport(RegisterInitialInventoryService registerInitialInventoryService,
                                       AdjustInventoryService adjustInventoryService,
@@ -45,7 +49,8 @@ public class InventoryOperationsSupport {
                                       WarehouseRepositoryPort warehouseRepository,
                                       InventoryRepositoryPort inventoryRepository,
                                       InventoryMovementRepositoryPort movementRepository,
-                                      ReturnRequestRepositoryPort returnRepository) {
+                                      ReturnRequestRepositoryPort returnRepository,
+                                      RegisterAuditLogService auditLogService) {
         this.registerInitialInventoryService = registerInitialInventoryService;
         this.adjustInventoryService = adjustInventoryService;
         this.markInventoryService = markInventoryService;
@@ -55,6 +60,7 @@ public class InventoryOperationsSupport {
         this.inventoryRepository = inventoryRepository;
         this.movementRepository = movementRepository;
         this.returnRepository = returnRepository;
+        this.auditLogService = auditLogService;
     }
 
     public Inventory registerInitialInventory(User user, Seller seller, Product product,
@@ -66,6 +72,8 @@ public class InventoryOperationsSupport {
                 inventoryRepository.findByProduct(storedProduct.getId()));
         inventoryRepository.save(result.inventory());
         movementRepository.saveAll(result.movements());
+        auditLogService.register(AuditOperation.INVENTORY_REGISTRATION, user, result.inventory().getId(),
+                Map.of("quantity", String.valueOf(quantity)));
         return result.inventory();
     }
 
@@ -74,6 +82,8 @@ public class InventoryOperationsSupport {
         InventoryMovement movement = adjustInventoryService.adjust(user, seller, stored, difference, reason);
         inventoryRepository.save(stored);
         movementRepository.saveAll(List.of(movement));
+        auditLogService.register(AuditOperation.INVENTORY_ADJUSTMENT, user, stored.getId(),
+                Map.of("difference", String.valueOf(difference), "reason", movement.getReason()));
         return stored;
     }
 
@@ -81,6 +91,7 @@ public class InventoryOperationsSupport {
         Inventory stored = reload(inventory);
         markInventoryService.markDamaged(user, seller, stored);
         inventoryRepository.save(stored);
+        auditStatusChange(user, stored);
         return stored;
     }
 
@@ -88,6 +99,7 @@ public class InventoryOperationsSupport {
         Inventory stored = reload(inventory);
         markInventoryService.block(user, seller, stored);
         inventoryRepository.save(stored);
+        auditStatusChange(user, stored);
         return stored;
     }
 
@@ -95,6 +107,7 @@ public class InventoryOperationsSupport {
         Inventory stored = reload(inventory);
         markInventoryService.enable(user, seller, stored);
         inventoryRepository.save(stored);
+        auditStatusChange(user, stored);
         return stored;
     }
 
@@ -107,7 +120,14 @@ public class InventoryOperationsSupport {
         inventoryRepository.save(stored);
         returnRepository.save(storedReturn);
         movementRepository.saveAll(List.of(movement));
+        auditLogService.register(AuditOperation.INVENTORY_RESTOCK, user, stored.getId(),
+                Map.of("units", String.valueOf(units), "return", storedReturn.getId().toString()));
         return stored;
+    }
+
+    private void auditStatusChange(User user, Inventory inventory) {
+        auditLogService.register(AuditOperation.INVENTORY_STATUS_CHANGE, user, inventory.getId(),
+                Map.of("status", inventory.getStatus().name()));
     }
 
     private Inventory reload(Inventory inventory) {

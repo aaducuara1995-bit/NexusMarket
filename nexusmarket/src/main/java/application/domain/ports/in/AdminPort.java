@@ -1,10 +1,13 @@
 package application.domain.ports.in;
 
+import application.domain.entities.AuditLog;
 import application.domain.entities.Refund;
 import application.domain.entities.ReturnRequest;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+
+import java.util.List;
 
 /** Operations of the ADMIN role: users, sellers, warehouses and after-sales decisions. */
 public interface AdminPort {
@@ -26,4 +29,6 @@ public interface AdminPort {
     ReturnRequest rejectReturn(User admin, ReturnRequest returnRequest);
 
     Refund processRefund(User admin, Refund refund);
+
+    List<AuditLog> consultAuditLog(User admin);
 }

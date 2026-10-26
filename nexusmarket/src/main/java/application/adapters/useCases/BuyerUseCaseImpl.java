@@ -9,6 +9,7 @@ import application.domain.entities.Product;
 import application.domain.entities.ReturnRequest;
 import application.domain.entities.Shipment;
 import application.domain.entities.User;
+import application.domain.enums.AuditOperation;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
 import application.domain.exceptions.AccessDeniedException;
@@ -31,11 +32,13 @@ import application.domain.services.CreateShipmentService;
 import application.domain.services.DeliverDigitalOrderService;
 import application.domain.services.IssueInvoiceService;
 import application.domain.services.PayOrderService;
+import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RequestReturnService;
 import application.domain.valueobjects.Address;
 import application.domain.valueobjects.Money;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /** Operations of the BUYER role: cart, order, payment and returns. */
@@ -59,6 +62,7 @@ public class BuyerUseCaseImpl implements BuyerPort {
     private final InvoiceRepositoryPort invoiceRepository;
     private final ShipmentRepositoryPort shipmentRepository;
     private final ReturnRequestRepositoryPort returnRepository;
+    private final RegisterAuditLogService auditLogService;
 
     public BuyerUseCaseImpl(AuthorizationService authorizationService,
                             AddToCartService addToCartService,
@@ -77,7 +81,8 @@ public class BuyerUseCaseImpl implements BuyerPort {
                             OrderRepositoryPort orderRepository,
                             InvoiceRepositoryPort invoiceRepository,
                             ShipmentRepositoryPort shipmentRepository,
-                            ReturnRequestRepositoryPort returnRepository) {
+                            ReturnRequestRepositoryPort returnRepository,
+                            RegisterAuditLogService auditLogService) {
         this.authorizationService = authorizationService;
         this.addToCartService = addToCartService;
         this.confirmOrderService = confirmOrderService;
@@ -96,6 +101,7 @@ public class BuyerUseCaseImpl implements BuyerPort {
         this.invoiceRepository = invoiceRepository;
         this.shipmentRepository = shipmentRepository;
         this.returnRepository = returnRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -144,6 +150,8 @@ public class BuyerUseCaseImpl implements BuyerPort {
         movementRepository.saveAll(result.movements());
         inventoryRepository.saveAll(inventories);
         cartRepository.save(cart);
+        auditLogService.register(AuditOperation.ORDER_CONFIRMATION, user, result.order().getId(),
+                Map.of("total", result.order().calculateTotal().amount().toPlainString()));
         return result.order();
     }
 
@@ -172,6 +180,8 @@ public class BuyerUseCaseImpl implements BuyerPort {
         }
 
         orderRepository.save(stored);
+        auditLogService.register(AuditOperation.ORDER_PAYMENT, user, stored.getId(),
+                Map.of("invoice", invoice.getId().toString(), "status", stored.getStatus().name()));
         return stored;
     }
 
@@ -188,6 +198,8 @@ public class BuyerUseCaseImpl implements BuyerPort {
         ReturnRequest returnRequest = requestReturnService.request(user, buyer, stored, reason,
                 returnRepository.findByOrder(stored.getId()));
         returnRepository.save(returnRequest);
+        auditLogService.register(AuditOperation.RETURN_REQUEST, user, returnRequest.getId(),
+                Map.of("order", stored.getId().toString()));
         return returnRequest;
     }
 

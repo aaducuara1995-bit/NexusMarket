@@ -22,6 +22,7 @@ Pedidos: Order, OrderItem
 Facturación: Invoice
 Logística: Shipment
 Posventa: ReturnRequest, Refund
+Auditoría: AuditLog
 ```
 
 ---
@@ -42,6 +43,7 @@ Order ──> Invoice
 Order ──> Shipment
 Order ──> ReturnRequest
 Order ──> Refund
+User ──(performedByUserId)──> AuditLog ──(affectedEntityId)──> cualquier registro
 ```
 
 ---
@@ -682,6 +684,45 @@ Devolución del dinero de un pedido pagado.
 
 * El monto es mayor que cero, en la moneda del pedido y no supera su total.
 * Se procesa una sola vez.
+
+---
+
+# AuditLog
+
+**Área:** Auditoría
+
+## Descripción
+
+Registro inmutable de una operación del negocio: quién la hizo, con qué rol, cuándo y sobre qué registro. Se guarda en MongoDB, igual que la auditoría del proyecto de referencia, y da la trazabilidad que pide la especificación.
+
+## Atributos
+
+| Atributo | Tipo | Descripción |
+|---|---|---|
+| `id` | `UUID` | Identificador único del registro. |
+| `operation` | `AuditOperation` | Operación auditada. |
+| `date` | `LocalDateTime` | Fecha y hora de la operación. |
+| `performedByUserId` | `UUID` | Usuario que hizo la operación. |
+| `performedByRole` | `UserRole` | Rol del usuario en ese momento. |
+| `affectedEntityId` | `UUID` | Registro afectado (pedido, producto, inventario, usuario, etc.). |
+| `details` | `Map<String, String>` | Datos adicionales de la operación, como el nuevo estado o el monto. |
+
+## Comportamiento
+
+| Método | Descripción |
+|---|---|
+| `static AuditLog restore(UUID id, AuditOperation operation, LocalDateTime date, UUID performedByUserId, UserRole performedByRole, UUID affectedEntityId, Map<String, String> details)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
+
+## Relaciones
+
+* Referencia a un `User` por su id.
+* Referencia al registro afectado por su id, sin depender de su tipo.
+
+## Reglas de negocio
+
+* Es inmutable: el registro solo crece, nunca se modifica ni se borra.
+* Exige la operación, el usuario y el registro afectado.
+* Guarda una copia de los detalles, así que cambiarlos después no altera el registro.
 
 ---
 

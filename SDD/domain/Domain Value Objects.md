@@ -19,6 +19,7 @@ valueobjects
 └── Money
 
 enums
+├── AuditOperation
 ├── BusinessProcess
 ├── CommercialStatus
 ├── InventoryStatus
@@ -143,6 +144,38 @@ Valor monetario: precios, subtotales, totales, pagos y reembolsos.
 ---
 
 # Enumeraciones
+
+---
+
+# AuditOperation
+
+## Descripción
+
+Operaciones del negocio que dejan registro en la auditoría.
+
+## Valores permitidos
+
+| Valor | Significado |
+|---|---|
+| `USER_REGISTRATION` | Registro de un usuario. |
+| `USER_BLOCKING` | Bloqueo de un usuario. |
+| `USER_ACTIVATION` | Reactivación de un usuario. |
+| `SELLER_ONBOARDING` | Alta de un vendedor con su primera bodega. |
+| `WAREHOUSE_REGISTRATION` | Registro de una bodega. |
+| `PRODUCT_REGISTRATION` | Registro de un producto. |
+| `PRODUCT_STATUS_CHANGE` | Publicación, suspensión o descontinuación de un producto. |
+| `INVENTORY_REGISTRATION` | Registro de inventario inicial. |
+| `INVENTORY_ADJUSTMENT` | Ajuste de existencias. |
+| `INVENTORY_STATUS_CHANGE` | Inventario marcado como dañado, bloqueado o habilitado. |
+| `INVENTORY_RESTOCK` | Reintegro de unidades por devolución. |
+| `ORDER_CONFIRMATION` | Confirmación de un pedido. |
+| `ORDER_PAYMENT` | Pago de un pedido. |
+| `ORDER_SHIPMENT` | Despacho de un pedido. |
+| `ORDER_DELIVERY` | Entrega de un pedido. |
+| `RETURN_REQUEST` | Solicitud de devolución. |
+| `RETURN_APPROVAL` | Aprobación de una devolución. |
+| `RETURN_REJECTION` | Rechazo de una devolución. |
+| `REFUND_PROCESSING` | Procesamiento de un reembolso. |
 
 ---
 

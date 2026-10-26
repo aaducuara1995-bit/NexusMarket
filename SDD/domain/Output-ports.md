@@ -17,9 +17,22 @@ Persistence Adapter  (adapters/persistence, Fase B: MySQL)
 Base de datos
 ```
 
-Hay 14 puertos, uno por entidad que se guarda. Las búsquedas devuelven `Optional` cuando puede no haber resultado y `List` cuando puede haber varios. En las pruebas se usan implementaciones en memoria (`InMemoryRepositories`).
+Hay 15 puertos, uno por entidad que se guarda. Siguiendo el proyecto de referencia, la auditoría (`AuditLogRepositoryPort`) va en MongoDB y el resto en MySQL. Las búsquedas devuelven `Optional` cuando puede no haber resultado y `List` cuando puede haber varios. En las pruebas se usan implementaciones en memoria (`InMemoryRepositories`).
 
 ---
+
+## AuditLogRepositoryPort
+
+Auditoría de operaciones. Es el único puerto implementado con **MongoDB**; los demás usan MySQL.
+
+**Lo usan:** `ConsultAuditLogService`, `RegisterAuditLogService`
+
+```java
+void save(AuditLog auditLog);
+List<AuditLog> findAll();
+List<AuditLog> findByUser(UUID userId);
+List<AuditLog> findByAffectedEntity(UUID entityId);
+```
 
 ## BuyerRepositoryPort
 

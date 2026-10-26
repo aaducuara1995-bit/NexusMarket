@@ -1,10 +1,12 @@
 package application.adapters.useCases;
 
+import application.domain.entities.AuditLog;
 import application.domain.entities.Refund;
 import application.domain.entities.ReturnRequest;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+import application.domain.enums.AuditOperation;
 import application.domain.enums.BusinessProcess;
 import application.domain.ports.in.AdminPort;
 import application.domain.ports.out.RefundRepositoryPort;
@@ -13,14 +15,17 @@ import application.domain.ports.out.SellerRepositoryPort;
 import application.domain.ports.out.UserRepositoryPort;
 import application.domain.ports.out.WarehouseRepositoryPort;
 import application.domain.services.AuthorizationService;
+import application.domain.services.ConsultAuditLogService;
 import application.domain.services.GenerateRefundService;
 import application.domain.services.OnboardSellerService;
 import application.domain.services.ProcessRefundService;
+import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterUserService;
 import application.domain.services.RegisterWarehouseService;
 import application.domain.services.ResolveReturnService;
 
 import java.util.List;
+import java.util.Map;
 
 /** Operations of the ADMIN role: users, sellers, warehouses and after-sales decisions. */
 public class AdminUseCaseImpl implements AdminPort {
@@ -37,6 +42,8 @@ public class AdminUseCaseImpl implements AdminPort {
     private final WarehouseRepositoryPort warehouseRepository;
     private final ReturnRequestRepositoryPort returnRepository;
     private final RefundRepositoryPort refundRepository;
+    private final RegisterAuditLogService auditLogService;
+    private final ConsultAuditLogService consultAuditLogService;
 
     public AdminUseCaseImpl(AuthorizationService authorizationService,
                             RegisterUserService registerUserService,
@@ -49,7 +56,9 @@ public class AdminUseCaseImpl implements AdminPort {
                             SellerRepositoryPort sellerRepository,
                             WarehouseRepositoryPort warehouseRepository,
                             ReturnRequestRepositoryPort returnRepository,
-                            RefundRepositoryPort refundRepository) {
+                            RefundRepositoryPort refundRepository,
+                            RegisterAuditLogService auditLogService,
+                            ConsultAuditLogService consultAuditLogService) {
         this.authorizationService = authorizationService;
         this.registerUserService = registerUserService;
         this.onboardSellerService = onboardSellerService;
@@ -62,6 +71,8 @@ public class AdminUseCaseImpl implements AdminPort {
         this.warehouseRepository = warehouseRepository;
         this.returnRepository = returnRepository;
         this.refundRepository = refundRepository;
+        this.auditLogService = auditLogService;
+        this.consultAuditLogService = consultAuditLogService;
     }
 
     @Override
@@ -69,8 +80,11 @@ public class AdminUseCaseImpl implements AdminPort {
         authorizationService.requirePermission(admin, BusinessProcess.USER_MANAGEMENT);
         if (newUser == null)
             throw new IllegalArgumentException("The user to register is required.");
-        return registerUserService.register(admin, newUser.getFullName(), newUser.getEmail(),
+        User registered = registerUserService.register(admin, newUser.getFullName(), newUser.getEmail(),
                 newUser.getDocument(), newUser.getRole());
+        auditLogService.register(AuditOperation.USER_REGISTRATION, admin, registered.getId(),
+                Map.of("role", registered.getRole().name()));
+        return registered;
     }
 
     @Override
@@ -80,6 +94,7 @@ public class AdminUseCaseImpl implements AdminPort {
             throw new IllegalStateException("An admin cannot block their own user.");
         stored.block();
         userRepository.save(stored);
+        auditLogService.register(AuditOperation.USER_BLOCKING, admin, stored.getId(), Map.of());
         return stored;
     }
 
@@ -88,6 +103,7 @@ public class AdminUseCaseImpl implements AdminPort {
         User stored = targetOf(admin, target);
         stored.activate();
         userRepository.save(stored);
+        auditLogService.register(AuditOperation.USER_ACTIVATION, admin, stored.getId(), Map.of());
         return stored;
     }
 
@@ -108,6 +124,8 @@ public class AdminUseCaseImpl implements AdminPort {
 
         sellerRepository.save(result.seller());
         warehouseRepository.save(result.warehouse());
+        auditLogService.register(AuditOperation.SELLER_ONBOARDING, admin, result.seller().getId(),
+                Map.of("user", storedUser.getId().toString(), "warehouse", result.warehouse().getName()));
         return result.seller();
     }
 
@@ -115,8 +133,10 @@ public class AdminUseCaseImpl implements AdminPort {
     public Warehouse registerMarketplaceWarehouse(User admin, Warehouse warehouse) {
         if (warehouse == null)
             throw new IllegalArgumentException("Warehouse is required.");
-        return registerWarehouseService.registerForMarketplace(admin, warehouse.getName(),
+        Warehouse registered = registerWarehouseService.registerForMarketplace(admin, warehouse.getName(),
                 warehouse.getType(), warehouse.getAddress());
+        auditWarehouse(admin, registered);
+        return registered;
     }
 
     @Override
@@ -125,8 +145,10 @@ public class AdminUseCaseImpl implements AdminPort {
         Seller storedSeller = Lookup.reload(seller, Seller::getId, sellerRepository::findById, "Seller");
         if (warehouse == null)
             throw new IllegalArgumentException("Warehouse is required.");
-        return registerWarehouseService.registerForSeller(admin, storedSeller, warehouse.getName(),
+        Warehouse registered = registerWarehouseService.registerForSeller(admin, storedSeller, warehouse.getName(),
                 warehouse.getType(), warehouse.getAddress());
+        auditWarehouse(admin, registered);
+        return registered;
     }
 
     /** Approving a return also generates its refund, which stays pending until processed. */
@@ -138,6 +160,8 @@ public class AdminUseCaseImpl implements AdminPort {
                 refundRepository.findByOrder(stored.getOrder().getId()).map(List::of).orElse(List.of()));
         returnRepository.save(stored);
         refundRepository.save(refund);
+        auditLogService.register(AuditOperation.RETURN_APPROVAL, admin, stored.getId(),
+                Map.of("refund", refund.getId().toString(), "amount", refund.getAmount().amount().toPlainString()));
         return stored;
     }
 
@@ -146,6 +170,7 @@ public class AdminUseCaseImpl implements AdminPort {
         ReturnRequest stored = reloadReturn(returnRequest);
         resolveReturnService.reject(admin, stored);
         returnRepository.save(stored);
+        auditLogService.register(AuditOperation.RETURN_REJECTION, admin, stored.getId(), Map.of());
         return stored;
     }
 
@@ -154,7 +179,19 @@ public class AdminUseCaseImpl implements AdminPort {
         Refund stored = Lookup.reload(refund, Refund::getId, refundRepository::findById, "Refund");
         processRefundService.process(admin, stored);
         refundRepository.save(stored);
+        auditLogService.register(AuditOperation.REFUND_PROCESSING, admin, stored.getId(),
+                Map.of("amount", stored.getAmount().amount().toPlainString()));
         return stored;
+    }
+
+    @Override
+    public List<AuditLog> consultAuditLog(User admin) {
+        return consultAuditLogService.consultAll(admin);
+    }
+
+    private void auditWarehouse(User admin, Warehouse warehouse) {
+        auditLogService.register(AuditOperation.WAREHOUSE_REGISTRATION, admin, warehouse.getId(),
+                Map.of("name", warehouse.getName(), "ownership", warehouse.getOwnership().name()));
     }
 
     private User targetOf(User admin, User target) {

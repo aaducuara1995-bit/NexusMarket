@@ -114,6 +114,7 @@ public interface AdminPort {
     ReturnRequest approveReturn(User admin, ReturnRequest returnRequest);
     ReturnRequest rejectReturn(User admin, ReturnRequest returnRequest);
     Refund processRefund(User admin, Refund refund);
+    List<AuditLog> consultAuditLog(User admin);
 }
 ```
 
@@ -130,5 +131,7 @@ public interface SupervisorPort {
     List<Warehouse> consultWarehouses(User supervisor);
     List<Inventory> consultInventory(User supervisor);
     List<Order> consultOrders(User supervisor);
+    List<AuditLog> consultAuditLog(User supervisor);
+    List<AuditLog> consultAuditLogOf(User supervisor, UUID entityId);
 }
 ```

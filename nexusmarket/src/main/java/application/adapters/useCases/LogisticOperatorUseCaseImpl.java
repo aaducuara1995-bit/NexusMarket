@@ -9,6 +9,7 @@ import application.domain.entities.ReturnRequest;
 import application.domain.entities.Shipment;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+import application.domain.enums.AuditOperation;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.OrderStatus;
 import application.domain.enums.UserRole;
@@ -22,9 +23,11 @@ import application.domain.ports.out.OrderRepositoryPort;
 import application.domain.ports.out.ShipmentRepositoryPort;
 import application.domain.services.AuthorizationService;
 import application.domain.services.ConfirmDeliveryService;
+import application.domain.services.RegisterAuditLogService;
 import application.domain.services.ShipOrderService;
 
 import java.util.List;
+import java.util.Map;
 
 /** Operations of the LOGISTIC_OPERATOR role: warehouse stock and order shipping. */
 public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
@@ -38,6 +41,7 @@ public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
     private final InventoryReservationRepositoryPort reservationRepository;
     private final InventoryMovementRepositoryPort movementRepository;
     private final InventoryRepositoryPort inventoryRepository;
+    private final RegisterAuditLogService auditLogService;
 
     public LogisticOperatorUseCaseImpl(AuthorizationService authorizationService,
                                        ShipOrderService shipOrderService,
@@ -47,7 +51,8 @@ public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
                                        ShipmentRepositoryPort shipmentRepository,
                                        InventoryReservationRepositoryPort reservationRepository,
                                        InventoryMovementRepositoryPort movementRepository,
-                                       InventoryRepositoryPort inventoryRepository) {
+                                       InventoryRepositoryPort inventoryRepository,
+                                       RegisterAuditLogService auditLogService) {
         this.authorizationService = authorizationService;
         this.shipOrderService = shipOrderService;
         this.confirmDeliveryService = confirmDeliveryService;
@@ -57,6 +62,7 @@ public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
         this.reservationRepository = reservationRepository;
         this.movementRepository = movementRepository;
         this.inventoryRepository = inventoryRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -123,6 +129,8 @@ public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
         movementRepository.saveAll(movements);
         shipmentRepository.save(shipment);
         orderRepository.save(stored);
+        auditLogService.register(AuditOperation.ORDER_SHIPMENT, user, stored.getId(),
+                Map.of("shipment", shipment.getId().toString()));
         return stored;
     }
 
@@ -134,6 +142,8 @@ public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
         confirmDeliveryService.confirm(user, stored, shipment);
         shipmentRepository.save(shipment);
         orderRepository.save(stored);
+        auditLogService.register(AuditOperation.ORDER_DELIVERY, user, stored.getId(),
+                Map.of("shipment", shipment.getId().toString()));
         return stored;
     }
 

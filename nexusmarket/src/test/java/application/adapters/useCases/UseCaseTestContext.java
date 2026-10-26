@@ -40,6 +40,7 @@ final class UseCaseTestContext {
     final InMemoryRepositories.Shipments shipments = new InMemoryRepositories.Shipments();
     final InMemoryRepositories.Returns returns = new InMemoryRepositories.Returns();
     final InMemoryRepositories.Refunds refunds = new InMemoryRepositories.Refunds();
+    final InMemoryRepositories.AuditLogs auditLogs = new InMemoryRepositories.AuditLogs();
 
     final PublicAccessUseCaseImpl publicAccess;
     final BuyerUseCaseImpl buyerUseCase;
@@ -56,9 +57,11 @@ final class UseCaseTestContext {
         SellerValidationService sellerValidation = new SellerValidationService();
         InventoryAccessService inventoryAccess = new InventoryAccessService(authorization, sellerValidation);
         RegisterUserService registerUser = new RegisterUserService(authorization, users);
+        RegisterAuditLogService audit = new RegisterAuditLogService(auditLogs);
+        ConsultAuditLogService consultAudit = new ConsultAuditLogService(authorization, auditLogs);
 
         publicAccess = new PublicAccessUseCaseImpl(registerUser, new RegisterBuyerService(buyers),
-                new CheckAvailabilityService(), products, inventories);
+                new CheckAvailabilityService(), products, inventories, audit);
 
         buyerUseCase = new BuyerUseCaseImpl(authorization,
                 new AddToCartService(buyerValidation),
@@ -67,32 +70,32 @@ final class UseCaseTestContext {
                 new DeliverDigitalOrderService(), new CreateShipmentService(),
                 new RequestReturnService(authorization),
                 buyers, carts, products, inventories, reservations, movements,
-                orders, invoices, shipments, returns);
+                orders, invoices, shipments, returns, audit);
 
         InventoryOperationsSupport inventoryOperations = new InventoryOperationsSupport(
                 new RegisterInitialInventoryService(inventoryAccess), new AdjustInventoryService(inventoryAccess),
                 new MarkInventoryService(inventoryAccess), new RestockInventoryService(inventoryAccess),
-                products, warehouses, inventories, movements, returns);
+                products, warehouses, inventories, movements, returns, audit);
 
         sellerUseCase = new SellerUseCaseImpl(authorization,
                 new RegisterProductService(authorization, sellerValidation, products),
                 new PublishProductService(authorization, sellerValidation),
                 new ChangeProductStatusService(authorization, sellerValidation),
-                inventoryOperations, sellers, products, inventories);
+                inventoryOperations, sellers, products, inventories, audit);
 
         logisticUseCase = new LogisticOperatorUseCaseImpl(authorization,
                 new ShipOrderService(authorization, new InventoryOutflowService()),
                 new ConfirmDeliveryService(authorization), inventoryOperations,
-                orders, shipments, reservations, movements, inventories);
+                orders, shipments, reservations, movements, inventories, audit);
 
         adminUseCase = new AdminUseCaseImpl(authorization, registerUser,
                 new OnboardSellerService(authorization),
                 new RegisterWarehouseService(authorization, warehouses),
                 new ResolveReturnService(authorization), new GenerateRefundService(),
                 new ProcessRefundService(authorization),
-                users, sellers, warehouses, returns, refunds);
+                users, sellers, warehouses, returns, refunds, audit, consultAudit);
 
-        supervisorUseCase = new SupervisorUseCaseImpl(authorization, users, warehouses, inventories, orders);
+        supervisorUseCase = new SupervisorUseCaseImpl(authorization, users, warehouses, inventories, orders, consultAudit);
     }
 
     // ----- Builders for the objects a controller would send -----

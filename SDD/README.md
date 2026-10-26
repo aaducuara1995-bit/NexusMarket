@@ -22,16 +22,16 @@ SDD
 ```text
 application
 ├── domain
-│   ├── entities        16 entidades
+│   ├── entities        17 entidades
 │   ├── valueobjects    5 objetos de valor
-│   ├── enums           15 enumeraciones
+│   ├── enums           16 enumeraciones
 │   ├── exceptions      AccessDeniedException, EntityNotFoundException
-│   ├── services        32 servicios de dominio
+│   ├── services        34 servicios de dominio
 │   └── ports
 │       ├── in          6 puertos de entrada, uno por rol más el acceso público
-│       └── out         14 puertos de salida
+│       └── out         15 puertos de salida (14 MySQL, 1 MongoDB)
 └── adapters
     └── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
 ```
 
-Las reglas del dominio y los flujos de los casos de uso están cubiertos por 221 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
+Las reglas del dominio y los flujos de los casos de uso están cubiertos por 230 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
