@@ -34,4 +34,4 @@ application
     └── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
 ```
 
-Las reglas del dominio y los flujos de los casos de uso están cubiertos por 209 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
+Las reglas del dominio y los flujos de los casos de uso están cubiertos por 221 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.

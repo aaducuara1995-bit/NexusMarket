@@ -34,6 +34,22 @@ public class Refund {
         this.status = RefundStatus.PENDING;
     }
 
+    private Refund(UUID id, Order order, Money amount, RefundStatus status) {
+        this.id = id;
+        this.order = order;
+        this.amount = amount;
+        this.status = status;
+    }
+
+    /** Rebuilds a refund saved by a persistence adapter. It is not for creating new ones. */
+    public static Refund restore(UUID id, Order order, Money amount, RefundStatus status) {
+        Restore.require(id, "id");
+        Restore.require(order, "order");
+        Restore.require(amount, "amount");
+        Restore.require(status, "status");
+        return new Refund(id, order, amount, status);
+    }
+
     public void process() {
         if (status != RefundStatus.PENDING)
             throw new IllegalStateException("The refund has already been processed.");

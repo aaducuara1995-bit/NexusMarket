@@ -73,6 +73,7 @@ Representa a una persona registrada en la plataforma. Es la base de la identific
 
 | Método | Descripción |
 |---|---|
+| `static User restore(UUID id, FullName fullName, Email email, IdentityDocument document, UserRole role, UserStatus status)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void block()` | Bloquea al usuario. Falla si ya estaba bloqueado. |
 | `void activate()` | Reactiva al usuario. Falla si ya estaba activo. |
 | `boolean isActive()` | Indica si el usuario está activo. |
@@ -112,6 +113,7 @@ Perfil comercial de un usuario con rol de comprador. Guarda la información que 
 
 | Método | Descripción |
 |---|---|
+| `static Buyer restore(UUID id, UUID userId, Address mainAddress, List<Address> additionalAddresses, CommercialStatus commercialStatus)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void addAdditionalAddress(Address address)` | Agrega una dirección secundaria. Rechaza direcciones repetidas. |
 | `void removeAdditionalAddress(Address address)` | Quita una dirección secundaria. |
 | `void changeMainAddress(Address newAddress)` | Cambia la dirección principal; la anterior pasa a ser adicional. |
@@ -146,6 +148,12 @@ Perfil de un usuario con rol de vendedor. Identifica al dueño de los productos 
 |---|---|---|
 | `id` | `UUID` | Identificador único del vendedor. |
 | `userId` | `UUID` | Identificador del `User` al que pertenece este perfil. |
+
+## Comportamiento
+
+| Método | Descripción |
+|---|---|
+| `static Seller restore(UUID id, UUID userId)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 
 ## Relaciones
 
@@ -184,6 +192,7 @@ Espacio de almacenamiento donde se guarda el inventario. Puede pertenecer al Mar
 |---|---|
 | `static Warehouse ofMarketplace(String name, WarehouseType type, Address address)` | Crea una bodega del Marketplace. |
 | `static Warehouse ofSeller(UUID sellerId, String name, WarehouseType type, Address address)` | Crea una bodega de un vendedor; exige el `sellerId`. |
+| `static Warehouse restore(UUID id, String name, WarehouseType type, Address address, WarehouseOwnership ownership, UUID sellerId)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `boolean isDigital()` | Indica si la bodega es digital. |
 | `boolean isMarketplaceOwned()` | Indica si la bodega es del Marketplace. |
 | `boolean belongsTo(UUID sellerIdToCheck)` | Indica si la bodega pertenece al vendedor indicado. |
@@ -225,6 +234,7 @@ Artículo físico o digital que un vendedor ofrece en el catálogo.
 
 | Método | Descripción |
 |---|---|
+| `static Product restore(UUID id, UUID sellerId, String name, String description, ProductType type, Money price, ProductStatus status, List<String> variants)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void addVariant(String variant)` | Agrega una variante. Rechaza vacías y repetidas. |
 | `void changePrice(Money newPrice)` | Cambia el precio, que debe ser mayor que cero. |
 | `void publish()` | Publica el producto. Un producto descontinuado no vuelve a publicarse. |
@@ -269,6 +279,7 @@ Existencias de un producto en una bodega específica. El inventario es distribui
 
 | Método | Descripción |
 |---|---|
+| `static Inventory restore(UUID id, Product product, Warehouse warehouse, int quantity, int reserved, InventoryStatus status)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `int getAvailable()` | Devuelve las unidades disponibles: `quantity - reserved`. |
 | `boolean isFor(UUID productId, UUID warehouseId)` | Indica si el registro corresponde al producto y la bodega indicados. |
 | `void receive(int units)` | Movimiento de ingreso: suma unidades. |
@@ -318,6 +329,7 @@ Registra las unidades de un inventario apartadas para un pedido. Permite saber q
 | Método | Descripción |
 |---|---|
 | `static InventoryReservation create(UUID orderId, Inventory inventory, int quantity)` | Crea la reserva y aparta las unidades en el inventario en el mismo acto. |
+| `static InventoryReservation restore(UUID id, UUID orderId, Inventory inventory, int quantity, LocalDateTime date, ReservationStatus status)` | Reconstruye una reserva guardada sin volver a apartar unidades: el inventario guardado ya las cuenta. |
 | `void release()` | Libera la reserva y devuelve las unidades al disponible. |
 | `void confirmOutflow()` | Confirma la salida por venta de las unidades reservadas. |
 | `boolean isActive()` | Indica si la reserva sigue activa. |
@@ -354,6 +366,12 @@ Registro histórico de cada movimiento de inventario. Da la trazabilidad que pid
 | `reason` | `String` | Motivo del movimiento. Obligatorio. |
 | `date` | `LocalDateTime` | Fecha y hora del movimiento. |
 
+## Comportamiento
+
+| Método | Descripción |
+|---|---|
+| `static InventoryMovement restore(UUID id, UUID inventoryId, UUID productId, UUID warehouseId, MovementType type, int quantity, String reason, LocalDateTime date)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
+
 ## Relaciones
 
 * Se refiere a un `Inventory`, un `Product` y una `Warehouse`.
@@ -385,6 +403,7 @@ Selección provisional de productos de un comprador. Representa la etapa "Carrit
 
 | Método | Descripción |
 |---|---|
+| `static Cart restore(UUID id, Buyer buyer, List<CartItem> items)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void addProduct(Product product, int quantity)` | Agrega un producto publicado; si ya estaba, suma la cantidad. |
 | `void removeProduct(UUID productId)` | Quita un producto del carrito. |
 | `void clear()` | Vacía el carrito. |
@@ -416,6 +435,12 @@ Línea de un carrito: un producto y la cantidad que el comprador quiere.
 |---|---|---|
 | `product` | `Product` | Producto seleccionado. |
 | `quantity` | `int` | Unidades seleccionadas. |
+
+## Comportamiento
+
+| Método | Descripción |
+|---|---|
+| `static CartItem restore(Product product, int quantity)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 
 ## Relaciones
 
@@ -450,6 +475,7 @@ Compromiso comercial formal de un comprador. Su ciclo de vida es el proceso cent
 
 | Método | Descripción |
 |---|---|
+| `static Order restore(UUID id, Buyer buyer, List<OrderItem> items, LocalDateTime date, Address deliveryAddress, OrderStatus status)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `Money calculateTotal()` | Suma los subtotales de todas las líneas. |
 | `boolean containsPhysicalProducts()` | Indica si el pedido tiene algún producto físico. |
 | `boolean isDigitalOnly()` | Indica si el pedido tiene solo productos digitales. |
@@ -495,6 +521,7 @@ Línea de un pedido. Guarda una copia de los datos del producto al momento de la
 
 | Método | Descripción |
 |---|---|
+| `static OrderItem restore(UUID productId, String productName, ProductType type, int quantity, Money unitPrice)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `Money subtotal()` | Devuelve `unitPrice * quantity`. |
 | `boolean isPhysical()` | Indica si el producto comprado es físico. |
 
@@ -524,6 +551,12 @@ Información comercial de la venta de un pedido pagado.
 | `order` | `Order` | Pedido facturado. |
 | `total` | `Money` | Total facturado, tomado del pedido. |
 | `date` | `LocalDateTime` | Fecha y hora de emisión. |
+
+## Comportamiento
+
+| Método | Descripción |
+|---|---|
+| `static Invoice restore(UUID id, Order order, Money total, LocalDateTime date)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 
 ## Relaciones
 
@@ -558,6 +591,7 @@ Proceso logístico de entrega de un pedido con productos físicos.
 
 | Método | Descripción |
 |---|---|
+| `static Shipment restore(UUID id, Order order, Address deliveryAddress, ShipmentStatus status)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void ship()` | Pasa de `PENDING` a `SHIPPED`. |
 | `void deliver()` | Pasa de `SHIPPED` a `DELIVERED`. |
 
@@ -594,6 +628,7 @@ Solicitud de un comprador para devolver un pedido entregado.
 
 | Método | Descripción |
 |---|---|
+| `static ReturnRequest restore(UUID id, Order order, String reason, ReturnStatus status, Map<UUID, Integer> restockedUnits)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void approve()` | Aprueba la devolución. |
 | `void reject()` | Rechaza la devolución. |
 | `boolean isApproved()` | Indica si la devolución fue aprobada. |
@@ -636,6 +671,7 @@ Devolución del dinero de un pedido pagado.
 
 | Método | Descripción |
 |---|---|
+| `static Refund restore(UUID id, Order order, Money amount, RefundStatus status)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
 | `void process()` | Marca el reembolso como procesado. |
 
 ## Relaciones
@@ -660,3 +696,4 @@ La especificación funcional no define algunos casos. Se resolvieron así:
 * **Gestión de devoluciones.** La matriz de responsabilidades no la incluye; se asignó a comprador y administrador, igual que los reembolsos.
 * **Unicidad de nombres.** El nombre de una bodega es único en la plataforma; el de un producto es único dentro de cada vendedor.
 * **Perfiles.** `Buyer` y `Seller` se relacionan con `User` por `userId` en lugar de heredar de él, porque cada usuario tiene un único rol (RG-02) y su perfil guarda datos propios del negocio.
+* **Reconstrucción desde la base de datos.** Los constructores públicos crean objetos nuevos: generan el id y fijan el estado inicial. Para leer de MySQL cada entidad tiene un método estático `restore(...)` que recibe el id y el estado guardados. Solo lo usan los adaptadores de persistencia, y no vuelve a ejecutar efectos de creación (por ejemplo, restaurar una reserva no aparta unidades otra vez).

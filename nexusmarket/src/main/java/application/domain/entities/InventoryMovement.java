@@ -39,6 +39,32 @@ public class InventoryMovement {
         this.date = LocalDateTime.now();
     }
 
+    private InventoryMovement(UUID id, UUID inventoryId, UUID productId, UUID warehouseId,
+                              MovementType type, int quantity, String reason, LocalDateTime date) {
+        this.id = id;
+        this.inventoryId = inventoryId;
+        this.productId = productId;
+        this.warehouseId = warehouseId;
+        this.type = type;
+        this.quantity = quantity;
+        this.reason = reason;
+        this.date = date;
+    }
+
+    /** Rebuilds a movement saved by a persistence adapter. It is not for creating new ones. */
+    public static InventoryMovement restore(UUID id, UUID inventoryId, UUID productId, UUID warehouseId,
+                                            MovementType type, int quantity, String reason,
+                                            LocalDateTime date) {
+        Restore.require(id, "id");
+        Restore.require(inventoryId, "inventoryId");
+        Restore.require(productId, "productId");
+        Restore.require(warehouseId, "warehouseId");
+        Restore.require(type, "type");
+        Restore.require(reason, "reason");
+        Restore.require(date, "date");
+        return new InventoryMovement(id, inventoryId, productId, warehouseId, type, quantity, reason, date);
+    }
+
     public UUID getId() { return id; }
     public UUID getInventoryId() { return inventoryId; }
     public UUID getProductId() { return productId; }

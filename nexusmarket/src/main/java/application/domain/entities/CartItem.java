@@ -10,6 +10,14 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    /** Rebuilds a cart line saved by a persistence adapter. */
+    public static CartItem restore(Product product, int quantity) {
+        Restore.require(product, "product");
+        if (quantity <= 0)
+            throw new IllegalArgumentException("A stored cart line must have units.");
+        return new CartItem(product, quantity);
+    }
+
     void increase(int units) {
         this.quantity += units;
     }

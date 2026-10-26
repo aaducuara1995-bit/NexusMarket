@@ -47,6 +47,30 @@ public class Order {
         this.status = OrderStatus.PENDING_PAYMENT;
     }
 
+    private Order(UUID id, Buyer buyer, List<OrderItem> items, LocalDateTime date,
+                  Address deliveryAddress, OrderStatus status) {
+        this.id = id;
+        this.buyer = buyer;
+        this.items.addAll(items);
+        this.date = date;
+        this.deliveryAddress = deliveryAddress;
+        this.status = status;
+    }
+
+    /** Rebuilds a order saved by a persistence adapter. It is not for creating new ones. */
+    public static Order restore(UUID id, Buyer buyer, List<OrderItem> items, LocalDateTime date,
+                                Address deliveryAddress, OrderStatus status) {
+        Restore.require(id, "id");
+        Restore.require(buyer, "buyer");
+        Restore.require(items, "items");
+        Restore.require(date, "date");
+        Restore.require(deliveryAddress, "deliveryAddress");
+        Restore.require(status, "status");
+        if (items.isEmpty())
+            throw new IllegalArgumentException("A stored order must have lines.");
+        return new Order(id, buyer, items, date, deliveryAddress, status);
+    }
+
     public Money calculateTotal() {
         BigDecimal total = items.stream()
                 .map(i -> i.subtotal().amount())

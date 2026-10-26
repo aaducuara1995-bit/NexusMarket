@@ -14,13 +14,14 @@ public class InventoryReservation {
     private final LocalDateTime date;
     private ReservationStatus status;
 
-    private InventoryReservation(UUID orderId, Inventory inventory, int quantity) {
-        this.id = UUID.randomUUID();
+    private InventoryReservation(UUID id, UUID orderId, Inventory inventory, int quantity,
+                                 LocalDateTime date, ReservationStatus status) {
+        this.id = id;
         this.orderId = orderId;
         this.inventory = inventory;
         this.quantity = quantity;
-        this.date = LocalDateTime.now();
-        this.status = ReservationStatus.ACTIVE;
+        this.date = date;
+        this.status = status;
     }
 
     public static InventoryReservation create(UUID orderId, Inventory inventory, int quantity) {
@@ -30,7 +31,24 @@ public class InventoryReservation {
             throw new IllegalArgumentException("Inventory is required.");
 
         inventory.reserve(quantity);
-        return new InventoryReservation(orderId, inventory, quantity);
+        return new InventoryReservation(UUID.randomUUID(), orderId, inventory, quantity,
+                LocalDateTime.now(), ReservationStatus.ACTIVE);
+    }
+
+    /**
+     * Rebuilds a reservation saved by a persistence adapter. Unlike {@link #create}, it does
+     * not reserve units again: the stored inventory already counts them.
+     */
+    public static InventoryReservation restore(UUID id, UUID orderId, Inventory inventory, int quantity,
+                                               LocalDateTime date, ReservationStatus status) {
+        Restore.require(id, "id");
+        Restore.require(orderId, "orderId");
+        Restore.require(inventory, "inventory");
+        Restore.require(date, "date");
+        Restore.require(status, "status");
+        if (quantity <= 0)
+            throw new IllegalArgumentException("A stored reservation must have units.");
+        return new InventoryReservation(id, orderId, inventory, quantity, date, status);
     }
 
     public void release() {

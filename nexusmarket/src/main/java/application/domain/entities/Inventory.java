@@ -27,6 +27,28 @@ public class Inventory {
         this.status = InventoryStatus.AVAILABLE;
     }
 
+    private Inventory(UUID id, Product product, Warehouse warehouse,
+                      int quantity, int reserved, InventoryStatus status) {
+        this.id = id;
+        this.product = product;
+        this.warehouse = warehouse;
+        this.quantity = quantity;
+        this.reserved = reserved;
+        this.status = status;
+    }
+
+    /** Rebuilds a inventory saved by a persistence adapter. It is not for creating new ones. */
+    public static Inventory restore(UUID id, Product product, Warehouse warehouse,
+                                    int quantity, int reserved, InventoryStatus status) {
+        Restore.require(id, "id");
+        Restore.require(product, "product");
+        Restore.require(warehouse, "warehouse");
+        Restore.require(status, "status");
+        if (quantity < 0 || reserved < 0 || reserved > quantity)
+            throw new IllegalArgumentException("Stored inventory quantities are inconsistent.");
+        return new Inventory(id, product, warehouse, quantity, reserved, status);
+    }
+
     public int getAvailable() {
         return quantity - reserved;
     }

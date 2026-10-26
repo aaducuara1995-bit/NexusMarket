@@ -22,6 +22,27 @@ public class OrderItem {
         this.unitPrice = product.getPrice();
     }
 
+    private OrderItem(UUID productId, String productName, ProductType type,
+                      int quantity, Money unitPrice) {
+        this.productId = productId;
+        this.productName = productName;
+        this.type = type;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+    }
+
+    /** Rebuilds an order line saved by a persistence adapter. */
+    public static OrderItem restore(UUID productId, String productName, ProductType type,
+                                    int quantity, Money unitPrice) {
+        Restore.require(productId, "productId");
+        Restore.require(productName, "productName");
+        Restore.require(type, "type");
+        Restore.require(unitPrice, "unitPrice");
+        if (quantity <= 0)
+            throw new IllegalArgumentException("A stored order line must have units.");
+        return new OrderItem(productId, productName, type, quantity, unitPrice);
+    }
+
     public Money subtotal() {
         return new Money(
                 unitPrice.amount().multiply(BigDecimal.valueOf(quantity)),

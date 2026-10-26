@@ -15,7 +15,7 @@ public class Warehouse {
     private final WarehouseOwnership ownership;
     private final UUID sellerId;
 
-    private Warehouse(String name, WarehouseType type, Address address,
+    private Warehouse(UUID id, String name, WarehouseType type, Address address,
                    WarehouseOwnership ownership, UUID sellerId) {
         if (name == null || name.isBlank())
             throw new IllegalArgumentException("Warehouse name cannot be empty.");
@@ -26,7 +26,7 @@ public class Warehouse {
         if (type == WarehouseType.DIGITAL && address != null)
             throw new IllegalArgumentException("A digital warehouse has no physical address.");
 
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.name = name.trim();
         this.type = type;
         this.address = address;
@@ -35,14 +35,24 @@ public class Warehouse {
     }
 
     public static Warehouse ofMarketplace(String name, WarehouseType type, Address address) {
-        return new Warehouse(name, type, address, WarehouseOwnership.MARKETPLACE, null);
+        return new Warehouse(UUID.randomUUID(), name, type, address, WarehouseOwnership.MARKETPLACE, null);
     }
 
     public static Warehouse ofSeller(UUID sellerId, String name,
                                     WarehouseType type, Address address) {
         if (sellerId == null)
             throw new IllegalArgumentException("A seller warehouse must have an owner.");
-        return new Warehouse(name, type, address, WarehouseOwnership.SELLER, sellerId);
+        return new Warehouse(UUID.randomUUID(), name, type, address, WarehouseOwnership.SELLER, sellerId);
+    }
+
+    /** Rebuilds a warehouse saved by a persistence adapter. It is not for creating new ones. */
+    public static Warehouse restore(UUID id, String name, WarehouseType type, Address address,
+                                    WarehouseOwnership ownership, UUID sellerId) {
+        Restore.require(id, "id");
+        Restore.require(ownership, "ownership");
+        if (ownership == WarehouseOwnership.SELLER)
+            Restore.require(sellerId, "sellerId");
+        return new Warehouse(id, name, type, address, ownership, sellerId);
     }
 
     public boolean isDigital() {

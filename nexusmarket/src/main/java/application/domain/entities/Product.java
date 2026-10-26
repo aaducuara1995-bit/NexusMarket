@@ -39,6 +39,32 @@ public class Product {
         this.status = ProductStatus.SUSPENDED;
     }
 
+    private Product(UUID id, UUID sellerId, String name, String description, ProductType type,
+                    Money price, ProductStatus status, List<String> variants) {
+        this.id = id;
+        this.sellerId = sellerId;
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.price = price;
+        this.status = status;
+        this.variants.addAll(variants);
+    }
+
+    /** Rebuilds a product saved by a persistence adapter. It is not for creating new ones. */
+    public static Product restore(UUID id, UUID sellerId, String name, String description,
+                                  ProductType type, Money price, ProductStatus status,
+                                  List<String> variants) {
+        Restore.require(id, "id");
+        Restore.require(sellerId, "sellerId");
+        Restore.require(name, "name");
+        Restore.require(type, "type");
+        Restore.require(price, "price");
+        Restore.require(status, "status");
+        Restore.require(variants, "variants");
+        return new Product(id, sellerId, name, description, type, price, status, variants);
+    }
+
     public void addVariant(String variant) {
         if (variant == null || variant.isBlank())
             throw new IllegalArgumentException("Variant cannot be empty.");

@@ -32,6 +32,28 @@ public class User {
         this.status = UserStatus.ACTIVE;
     }
 
+    private User(UUID id, FullName fullName, Email email, IdentityDocument document,
+                 UserRole role, UserStatus status) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.document = document;
+        this.role = role;
+        this.status = status;
+    }
+
+    /** Rebuilds a user saved by a persistence adapter. It is not for creating new ones. */
+    public static User restore(UUID id, FullName fullName, Email email, IdentityDocument document,
+                               UserRole role, UserStatus status) {
+        Restore.require(id, "id");
+        Restore.require(fullName, "fullName");
+        Restore.require(email, "email");
+        Restore.require(document, "document");
+        Restore.require(role, "role");
+        Restore.require(status, "status");
+        return new User(id, fullName, email, document, role, status);
+    }
+
     public void block() {
         if (status == UserStatus.BLOCKED)
             throw new IllegalStateException("The user is already blocked.");

@@ -26,6 +26,22 @@ public class Invoice {
         this.date = LocalDateTime.now();
     }
 
+    private Invoice(UUID id, Order order, Money total, LocalDateTime date) {
+        this.id = id;
+        this.order = order;
+        this.total = total;
+        this.date = date;
+    }
+
+    /** Rebuilds a invoice saved by a persistence adapter. It is not for creating new ones. */
+    public static Invoice restore(UUID id, Order order, Money total, LocalDateTime date) {
+        Restore.require(id, "id");
+        Restore.require(order, "order");
+        Restore.require(total, "total");
+        Restore.require(date, "date");
+        return new Invoice(id, order, total, date);
+    }
+
     public UUID getId() { return id; }
     public Order getOrder() { return order; }
     public Money getTotal() { return total; }

@@ -3,6 +3,7 @@ package application.domain.entities;
 import application.domain.enums.OrderStatus;
 import application.domain.enums.ReturnStatus;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +28,26 @@ public class ReturnRequest {
         this.order = order;
         this.reason = reason.trim();
         this.status = ReturnStatus.REQUESTED;
+    }
+
+    private ReturnRequest(UUID id, Order order, String reason, ReturnStatus status,
+                          Map<UUID, Integer> restockedUnits) {
+        this.id = id;
+        this.order = order;
+        this.reason = reason;
+        this.status = status;
+        this.restockedUnits.putAll(restockedUnits);
+    }
+
+    /** Rebuilds a return request saved by a persistence adapter. It is not for creating new ones. */
+    public static ReturnRequest restore(UUID id, Order order, String reason, ReturnStatus status,
+                                        Map<UUID, Integer> restockedUnits) {
+        Restore.require(id, "id");
+        Restore.require(order, "order");
+        Restore.require(reason, "reason");
+        Restore.require(status, "status");
+        Restore.require(restockedUnits, "restockedUnits");
+        return new ReturnRequest(id, order, reason, status, restockedUnits);
     }
 
     public void approve() {
@@ -86,4 +107,5 @@ public class ReturnRequest {
     public Order getOrder() { return order; }
     public String getReason() { return reason; }
     public ReturnStatus getStatus() { return status; }
+    public Map<UUID, Integer> getRestockedUnits() { return Collections.unmodifiableMap(restockedUnits); }
 }

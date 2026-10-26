@@ -21,6 +21,20 @@ public class Cart {
         this.buyer = buyer;
     }
 
+    private Cart(UUID id, Buyer buyer, List<CartItem> items) {
+        this.id = id;
+        this.buyer = buyer;
+        this.items.addAll(items);
+    }
+
+    /** Rebuilds a cart saved by a persistence adapter. It is not for creating new ones. */
+    public static Cart restore(UUID id, Buyer buyer, List<CartItem> items) {
+        Restore.require(id, "id");
+        Restore.require(buyer, "buyer");
+        Restore.require(items, "items");
+        return new Cart(id, buyer, items);
+    }
+
     public void addProduct(Product product, int quantity) {
         if (product == null)
             throw new IllegalArgumentException("Product is required.");

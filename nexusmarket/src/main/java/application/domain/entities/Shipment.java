@@ -27,6 +27,22 @@ public class Shipment {
         this.status = ShipmentStatus.PENDING;
     }
 
+    private Shipment(UUID id, Order order, Address deliveryAddress, ShipmentStatus status) {
+        this.id = id;
+        this.order = order;
+        this.deliveryAddress = deliveryAddress;
+        this.status = status;
+    }
+
+    /** Rebuilds a shipment saved by a persistence adapter. It is not for creating new ones. */
+    public static Shipment restore(UUID id, Order order, Address deliveryAddress, ShipmentStatus status) {
+        Restore.require(id, "id");
+        Restore.require(order, "order");
+        Restore.require(deliveryAddress, "deliveryAddress");
+        Restore.require(status, "status");
+        return new Shipment(id, order, deliveryAddress, status);
+    }
+
     public void ship() {
         if (status != ShipmentStatus.PENDING)
             throw new IllegalStateException("Only a pending shipment can be shipped.");

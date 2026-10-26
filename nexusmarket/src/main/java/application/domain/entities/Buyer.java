@@ -28,6 +28,26 @@ public class Buyer {
         this.commercialStatus = CommercialStatus.ENABLED;
     }
 
+    private Buyer(UUID id, UUID userId, Address mainAddress,
+                  List<Address> additionalAddresses, CommercialStatus commercialStatus) {
+        this.id = id;
+        this.userId = userId;
+        this.mainAddress = mainAddress;
+        this.additionalAddresses.addAll(additionalAddresses);
+        this.commercialStatus = commercialStatus;
+    }
+
+    /** Rebuilds a buyer saved by a persistence adapter. It is not for creating new ones. */
+    public static Buyer restore(UUID id, UUID userId, Address mainAddress,
+                                List<Address> additionalAddresses, CommercialStatus commercialStatus) {
+        Restore.require(id, "id");
+        Restore.require(userId, "userId");
+        Restore.require(mainAddress, "mainAddress");
+        Restore.require(additionalAddresses, "additionalAddresses");
+        Restore.require(commercialStatus, "commercialStatus");
+        return new Buyer(id, userId, mainAddress, additionalAddresses, commercialStatus);
+    }
+
     public void addAdditionalAddress(Address address) {
         if (address == null)
             throw new IllegalArgumentException("Address is required.");
