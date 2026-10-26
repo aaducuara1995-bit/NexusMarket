@@ -7,11 +7,10 @@ import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.enums.MovementType;
 import application.domain.enums.ReturnStatus;
-import application.domain.ports.in.RestockInventoryUseCase;
 
 import java.util.UUID;
 
-public class RestockInventoryService implements RestockInventoryUseCase {
+public class RestockInventoryService {
 
     private final InventoryAccessService access;
 

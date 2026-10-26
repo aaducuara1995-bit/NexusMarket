@@ -7,11 +7,10 @@ import application.domain.entities.Inventory;
 import application.domain.entities.Product;
 import application.domain.entities.User;
 import application.domain.exceptions.AccessDeniedException;
-import application.domain.ports.in.AddToCartUseCase;
 
 import java.util.List;
 
-public class AddToCartService implements AddToCartUseCase {
+public class AddToCartService {
 
     private final BuyerValidationService buyerValidation;
     private final CheckAvailabilityService availability = new CheckAvailabilityService();

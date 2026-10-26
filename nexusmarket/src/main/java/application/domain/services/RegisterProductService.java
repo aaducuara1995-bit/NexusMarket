@@ -5,11 +5,10 @@ import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.ProductType;
-import application.domain.ports.in.RegisterProductUseCase;
 import application.domain.ports.out.ProductRepositoryPort;
 import application.domain.valueobjects.Money;
 
-public class RegisterProductService implements RegisterProductUseCase {
+public class RegisterProductService {
 
     private final AuthorizationService authorization;
     private final SellerValidationService sellerValidation;

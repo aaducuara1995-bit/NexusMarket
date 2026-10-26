@@ -3,11 +3,10 @@ package application.domain.services;
 import application.domain.entities.Inventory;
 import application.domain.entities.Product;
 import application.domain.enums.InventoryStatus;
-import application.domain.ports.in.CheckAvailabilityUseCase;
 
 import java.util.List;
 
-public class CheckAvailabilityService implements CheckAvailabilityUseCase {
+public class CheckAvailabilityService {
 
     public int availableOf(Product product, List<Inventory> inventories) {
         validate(product, inventories);

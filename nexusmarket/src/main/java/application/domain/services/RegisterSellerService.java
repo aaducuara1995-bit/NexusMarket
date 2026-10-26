@@ -4,10 +4,9 @@ import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
-import application.domain.ports.in.RegisterSellerUseCase;
 import application.domain.ports.out.SellerRepositoryPort;
 
-public class RegisterSellerService implements RegisterSellerUseCase {
+public class RegisterSellerService {
 
     private final AuthorizationService authorization;
     private final SellerRepositoryPort sellers;

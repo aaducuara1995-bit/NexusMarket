@@ -10,7 +10,7 @@ Desde la selección de productos hasta el pago y la entrega de productos digital
 
 **Quién lo ejecuta:** Comprador.
 
-**Puerto de entrada que implementa:** `AddToCartUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** `BuyerValidationService buyerValidation`
 
@@ -35,7 +35,7 @@ void add(User user, Buyer buyer, Cart cart, Product product, int quantity, List<
 
 **Quién lo ejecuta:** Comprador.
 
-**Puerto de entrada que implementa:** `ConfirmOrderUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** `BuyerValidationService buyerValidation`, `ReserveInventoryService reservationService`, `ReleaseReservationService releaseService`
 
@@ -43,6 +43,7 @@ void add(User user, Buyer buyer, Cart cart, Product product, int quantity, List<
 
 ```java
 Result confirm(User user, Buyer buyer, Cart cart, List<Inventory> inventories);
+Result confirm(User user, Buyer buyer, Cart cart, List<Inventory> inventories, Address deliveryAddress);
 ```
 
 **Resultado:** `Result(Order order, List<InventoryReservation> reservations, List<InventoryMovement> movements)`
@@ -52,6 +53,7 @@ Result confirm(User user, Buyer buyer, Cart cart, List<Inventory> inventories);
 * El carrito no puede estar vacío y sus productos deben seguir publicados.
 * Todo o nada: si un producto no alcanza, se deshacen las reservas y el carrito queda intacto.
 * Si todo sale bien, el carrito se vacía y el pedido queda `PENDING_PAYMENT`.
+* Recibe la dirección de entrega que elige el comprador; si no llega, el pedido usa la dirección principal. Una dirección que no es del comprador se rechaza antes de reservar.
 
 ---
 
@@ -61,7 +63,7 @@ Result confirm(User user, Buyer buyer, Cart cart, List<Inventory> inventories);
 
 **Quién lo ejecuta:** Interno (después del pago).
 
-**Puerto de entrada que implementa:** `DeliverDigitalOrderUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** ninguna
 
@@ -84,7 +86,7 @@ void deliver(Order order);
 
 **Quién lo ejecuta:** Comprador dueño del pedido.
 
-**Puerto de entrada que implementa:** `PayOrderUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** `BuyerValidationService buyerValidation`
 

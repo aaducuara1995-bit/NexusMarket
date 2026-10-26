@@ -2,9 +2,8 @@ package application.domain.services;
 
 import application.domain.entities.Order;
 import application.domain.enums.OrderStatus;
-import application.domain.ports.in.DeliverDigitalOrderUseCase;
 
-public class DeliverDigitalOrderService implements DeliverDigitalOrderUseCase {
+public class DeliverDigitalOrderService {
 
     /**
      * Digital products are delivered right after payment, without going through logistics.

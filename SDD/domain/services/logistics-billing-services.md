@@ -10,7 +10,7 @@ Factura, envío, despacho y confirmación de entrega (OBJ-09 y OBJ-10).
 
 **Quién lo ejecuta:** Operador logístico.
 
-**Puerto de entrada que implementa:** `ConfirmDeliveryUseCase`
+**Lo usa:** `LogisticOperatorUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`
 
@@ -33,7 +33,7 @@ void confirm(User actor, Order order, Shipment shipment);
 
 **Quién lo ejecuta:** Interno (después del pago).
 
-**Puerto de entrada que implementa:** `CreateShipmentUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** ninguna
 
@@ -57,7 +57,7 @@ Shipment create(Order order, Address deliveryAddress, List<Shipment> existing);
 
 **Quién lo ejecuta:** Interno (después del pago).
 
-**Puerto de entrada que implementa:** `IssueInvoiceUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** ninguna
 
@@ -80,7 +80,7 @@ Invoice issue(Order order, List<Invoice> existing);
 
 **Quién lo ejecuta:** Operador logístico.
 
-**Puerto de entrada que implementa:** `ShipOrderUseCase`
+**Lo usa:** `LogisticOperatorUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`, `InventoryOutflowService inventoryOutflow`
 

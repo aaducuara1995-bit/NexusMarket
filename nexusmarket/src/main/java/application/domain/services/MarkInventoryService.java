@@ -3,9 +3,8 @@ package application.domain.services;
 import application.domain.entities.Inventory;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
-import application.domain.ports.in.MarkInventoryUseCase;
 
-public class MarkInventoryService implements MarkInventoryUseCase {
+public class MarkInventoryService {
 
     private final InventoryAccessService access;
 

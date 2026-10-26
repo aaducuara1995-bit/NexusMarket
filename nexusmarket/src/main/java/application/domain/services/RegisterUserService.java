@@ -4,13 +4,12 @@ import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
 import application.domain.exceptions.AccessDeniedException;
-import application.domain.ports.in.RegisterUserUseCase;
 import application.domain.ports.out.UserRepositoryPort;
 import application.domain.valueobjects.Email;
 import application.domain.valueobjects.FullName;
 import application.domain.valueobjects.IdentityDocument;
 
-public class RegisterUserService implements RegisterUserUseCase {
+public class RegisterUserService {
 
     private final AuthorizationService authorization;
     private final UserRepositoryPort users;

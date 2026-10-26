@@ -10,7 +10,7 @@ Devoluciones y reembolsos (OBJ-11).
 
 **Quién lo ejecuta:** Interno (después de aprobar).
 
-**Puerto de entrada que implementa:** `GenerateRefundUseCase`
+**Lo usa:** `AdminUseCaseImpl`
 
 **Dependencias:** ninguna
 
@@ -34,7 +34,7 @@ Refund generate(ReturnRequest returnRequest, List<Refund> existing);
 
 **Quién lo ejecuta:** Administrador.
 
-**Puerto de entrada que implementa:** `ProcessRefundUseCase`
+**Lo usa:** `AdminUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`
 
@@ -57,7 +57,7 @@ void process(User actor, Refund refund);
 
 **Quién lo ejecuta:** Comprador dueño del pedido.
 
-**Puerto de entrada que implementa:** `RequestReturnUseCase`
+**Lo usa:** `BuyerUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`
 
@@ -80,7 +80,7 @@ ReturnRequest request(User user, Buyer buyer, Order order, String reason, List<R
 
 **Quién lo ejecuta:** Administrador.
 
-**Puerto de entrada que implementa:** `ResolveReturnUseCase`
+**Lo usa:** `AdminUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`
 

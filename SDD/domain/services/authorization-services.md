@@ -10,6 +10,8 @@ Servicios de apoyo que deciden quién puede ejecutar cada operación. Los demás
 
 **Quién lo ejecuta:** Interno (lo usan otros servicios).
 
+**Lo usa:** `AdminUseCaseImpl`, `BuyerUseCaseImpl`, `LogisticOperatorUseCaseImpl`, `SellerUseCaseImpl`, `SupervisorUseCaseImpl`
+
 **Dependencias:** ninguna
 
 **Operaciones:**
@@ -23,7 +25,7 @@ void requirePermission(User user, BusinessProcess process);
 
 * Un usuario bloqueado no puede ejecutar ninguna operación.
 * Cada `BusinessProcess` tiene una lista fija de roles permitidos, tomada de la matriz de responsabilidades.
-* El `SUPERVISOR` no ejecuta procesos: su perfil es de consulta.
+* El `SUPERVISOR` solo tiene `ADMINISTRATIVE_REPORTS`: su perfil es de consulta.
 * Supuesto: `RETURN_MANAGEMENT` se asigna como `REFUND_MANAGEMENT` (comprador y administrador), porque la especificación no lo define.
 
 ---

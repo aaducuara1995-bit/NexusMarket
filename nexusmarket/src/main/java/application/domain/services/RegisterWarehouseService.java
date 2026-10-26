@@ -5,11 +5,10 @@ import application.domain.entities.User;
 import application.domain.entities.Warehouse;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.WarehouseType;
-import application.domain.ports.in.RegisterWarehouseUseCase;
 import application.domain.ports.out.WarehouseRepositoryPort;
 import application.domain.valueobjects.Address;
 
-public class RegisterWarehouseService implements RegisterWarehouseUseCase {
+public class RegisterWarehouseService {
 
     private final AuthorizationService authorization;
     private final WarehouseRepositoryPort warehouses;

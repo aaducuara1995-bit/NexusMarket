@@ -7,11 +7,10 @@ import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
 import application.domain.exceptions.AccessDeniedException;
-import application.domain.ports.in.RequestReturnUseCase;
 
 import java.util.List;
 
-public class RequestReturnService implements RequestReturnUseCase {
+public class RequestReturnService {
 
     private final AuthorizationService authorization;
 

@@ -2,12 +2,11 @@ package application.domain.services;
 
 import application.domain.entities.Order;
 import application.domain.entities.Shipment;
-import application.domain.ports.in.CreateShipmentUseCase;
 import application.domain.valueobjects.Address;
 
 import java.util.List;
 
-public class CreateShipmentService implements CreateShipmentUseCase {
+public class CreateShipmentService {
 
     public Shipment create(Order order, Address deliveryAddress, List<Shipment> existing) {
         if (order == null)

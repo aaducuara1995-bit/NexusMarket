@@ -9,12 +9,11 @@ import application.domain.entities.Warehouse;
 import application.domain.enums.MovementType;
 import application.domain.enums.UserRole;
 import application.domain.exceptions.AccessDeniedException;
-import application.domain.ports.in.RegisterInitialInventoryUseCase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegisterInitialInventoryService implements RegisterInitialInventoryUseCase {
+public class RegisterInitialInventoryService {
 
     public record Result(Inventory inventory, List<InventoryMovement> movements) {
     }

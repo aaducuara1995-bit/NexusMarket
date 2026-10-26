@@ -4,10 +4,9 @@ import application.domain.entities.Buyer;
 import application.domain.entities.Order;
 import application.domain.entities.User;
 import application.domain.exceptions.AccessDeniedException;
-import application.domain.ports.in.PayOrderUseCase;
 import application.domain.valueobjects.Money;
 
-public class PayOrderService implements PayOrderUseCase {
+public class PayOrderService {
 
     private final BuyerValidationService buyerValidation;
 

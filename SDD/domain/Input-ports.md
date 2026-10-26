@@ -2,291 +2,133 @@
 
 ## Introducción
 
-Los puertos de entrada son los contratos con los que el exterior (por ejemplo, un controlador REST) usa el dominio. Están en `domain/ports/in/` y trabajan solo con entidades y objetos de valor del dominio, nunca con DTOs.
+Los puertos de entrada son los contratos con los que el exterior (por ejemplo, un controlador REST) usa el dominio. Están en `domain/ports/in/` y se organizan por rol: un puerto por cada rol de `UserRole`, más un puerto de acceso público para lo que no requiere iniciar sesión.
 
-En esta etapa hay un puerto por caso de uso, y cada uno lo implementa el servicio de dominio correspondiente. En la etapa de adaptadores se agruparán por rol (comprador, vendedor, operador logístico, administrador, supervisor y acceso público), con clases de caso de uso que inyecten estos servicios.
-
-Los servicios internos de validación y de reservas no tienen puerto de entrada, porque solo los usan otros servicios. Hay 25 puertos.
+Así cada rol ve solo las operaciones que tiene permitidas, y la capa REST y la seguridad pueden validar el rol contra el puerto que se invoca.
 
 ---
 
-## AddToCartUseCase
+# Principios
 
-Agrega un producto al carrito del comprador.
+* **Aislamiento por rol.** Cada puerto agrupa las operaciones de un solo rol. Si dos roles comparten una operación (por ejemplo, el inventario del vendedor y del operador logístico), aparece en ambos puertos.
+* **Parámetros del dominio.** Los métodos reciben entidades y objetos de valor del dominio, nunca DTOs. El primer parámetro es el `User` que hace la petición; en la etapa de seguridad se reconstruirá a partir del token JWT.
+* **Implementación en adaptadores.** Cada puerto lo implementa una clase de `adapters/useCases/` (ver `../Adapters/Use-cases-adapters.md`). Los servicios de dominio ya no implementan puertos: son las piezas que esas clases inyectan.
 
-**Implementado por:** `AddToCartService`  
-**Rol:** Comprador.
+---
+
+# Definición de los puertos
+
+## 1. PublicAccessPort
+
+Operaciones disponibles sin iniciar sesión: el registro de compradores y la consulta del catálogo.
+
+**Rol:** Público (sin autenticación)  
+**Implementado por:** `PublicAccessUseCaseImpl`
 
 ```java
-void add(User user, Buyer buyer, Cart cart, Product product, int quantity, List<Inventory> inventories);
+public interface PublicAccessPort {
+    Buyer registerBuyer(User user, Address mainAddress);
+    List<Product> consultCatalog();
+    int consultAvailability(Product product);
+}
 ```
 
-## AdjustInventoryUseCase
+## 2. BuyerPort
 
-Ajusta las existencias de un inventario con un motivo.
+Carrito, confirmación y pago de pedidos, consulta de sus pedidos y solicitud de devoluciones.
 
-**Implementado por:** `AdjustInventoryService`  
-**Rol:** Vendedor u operador logístico.
+**Rol:** `BUYER`  
+**Implementado por:** `BuyerUseCaseImpl`
 
 ```java
-InventoryMovement adjust(User actor, Seller seller, Inventory inventory, int difference, String reason);
+public interface BuyerPort {
+    Cart consultMyCart(User user);
+    Cart addToCart(User user, Product product, int quantity);
+    Cart removeFromCart(User user, Product product);
+    Order confirmOrder(User user, Address deliveryAddress);
+    Order payOrder(User user, Order order, Money paidAmount);
+    List<Order> consultMyOrders(User user);
+    ReturnRequest requestReturn(User user, Order order, String reason);
+}
 ```
 
-## ChangeProductStatusUseCase
+## 3. SellerPort
 
-Suspende o descontinúa un producto.
+Catálogo e inventario de los productos propios del vendedor.
 
-**Implementado por:** `ChangeProductStatusService`  
-**Rol:** Vendedor dueño del producto.
+**Rol:** `SELLER`  
+**Implementado por:** `SellerUseCaseImpl`
 
 ```java
-void suspend(User actor, Seller seller, Product product);
-void discontinue(User actor, Seller seller, Product product, List<Inventory> inventories);
+public interface SellerPort {
+    Product registerProduct(User user, Product product);
+    Product publishProduct(User user, Product product);
+    Product suspendProduct(User user, Product product);
+    Product discontinueProduct(User user, Product product);
+    List<Product> consultMyProducts(User user);
+    Inventory registerInitialInventory(User user, Product product, Warehouse warehouse, int quantity);
+    Inventory adjustInventory(User user, Inventory inventory, int difference, String reason);
+    Inventory markInventoryDamaged(User user, Inventory inventory);
+    Inventory blockInventory(User user, Inventory inventory);
+    Inventory enableInventory(User user, Inventory inventory);
+    Inventory restockFromReturn(User user, Inventory inventory, ReturnRequest returnRequest, int units);
+}
 ```
 
-## CheckAvailabilityUseCase
+## 4. LogisticOperatorPort
 
-Calcula cuántas unidades de un producto hay disponibles entre todas las bodegas.
+Operación de bodegas (inventario de cualquier vendedor) y despacho y entrega de pedidos.
 
-**Implementado por:** `CheckAvailabilityService`  
-**Rol:** Cualquier usuario (consulta).
+**Rol:** `LOGISTIC_OPERATOR`  
+**Implementado por:** `LogisticOperatorUseCaseImpl`
 
 ```java
-int availableOf(Product product, List<Inventory> inventories);
-boolean hasAvailability(Product product, int quantity, List<Inventory> inventories);
+public interface LogisticOperatorPort {
+    Inventory registerInitialInventory(User user, Product product, Warehouse warehouse, int quantity);
+    Inventory adjustInventory(User user, Inventory inventory, int difference, String reason);
+    Inventory markInventoryDamaged(User user, Inventory inventory);
+    Inventory blockInventory(User user, Inventory inventory);
+    Inventory enableInventory(User user, Inventory inventory);
+    Inventory restockFromReturn(User user, Inventory inventory, ReturnRequest returnRequest, int units);
+    List<Order> consultOrdersToShip(User user);
+    Order shipOrder(User user, Order order);
+    Order confirmDelivery(User user, Order order);
+}
 ```
 
-## ConfirmDeliveryUseCase
+## 5. AdminPort
 
-Confirma la entrega y finaliza el pedido.
+Usuarios, alta de vendedores, bodegas y decisiones de posventa (devoluciones y reembolsos).
 
-**Implementado por:** `ConfirmDeliveryService`  
-**Rol:** Operador logístico.
+**Rol:** `ADMIN`  
+**Implementado por:** `AdminUseCaseImpl`
 
 ```java
-void confirm(User actor, Order order, Shipment shipment);
+public interface AdminPort {
+    User registerUser(User admin, User newUser);
+    User blockUser(User admin, User target);
+    User activateUser(User admin, User target);
+    Seller onboardSeller(User admin, User sellerUser, Warehouse firstWarehouse);
+    Warehouse registerMarketplaceWarehouse(User admin, Warehouse warehouse);
+    Warehouse registerSellerWarehouse(User admin, Seller seller, Warehouse warehouse);
+    ReturnRequest approveReturn(User admin, ReturnRequest returnRequest);
+    ReturnRequest rejectReturn(User admin, ReturnRequest returnRequest);
+    Refund processRefund(User admin, Refund refund);
+}
 ```
 
-## ConfirmOrderUseCase
+## 6. SupervisorPort
 
-Convierte el carrito en un pedido y reserva el stock de cada producto.
+Consultas de seguimiento sin modificar datos (OBJ-12).
 
-**Implementado por:** `ConfirmOrderService`  
-**Rol:** Comprador.
-
-```java
-ConfirmOrderService.Result confirm(User user, Buyer buyer, Cart cart, List<Inventory> inventories);
-```
-
-## CreateShipmentUseCase
-
-Crea el envío de un pedido pagado con productos físicos.
-
-**Implementado por:** `CreateShipmentService`  
-**Rol:** Interno (después del pago).
+**Rol:** `SUPERVISOR`  
+**Implementado por:** `SupervisorUseCaseImpl`
 
 ```java
-Shipment create(Order order, Address deliveryAddress, List<Shipment> existing);
-```
-
-## DeliverDigitalOrderUseCase
-
-Entrega de inmediato un pedido pagado formado solo por productos digitales.
-
-**Implementado por:** `DeliverDigitalOrderService`  
-**Rol:** Interno (después del pago).
-
-```java
-void deliver(Order order);
-```
-
-## GenerateRefundUseCase
-
-Genera el reembolso de una devolución aprobada.
-
-**Implementado por:** `GenerateRefundService`  
-**Rol:** Interno (después de aprobar).
-
-```java
-Refund generate(ReturnRequest returnRequest, List<Refund> existing);
-```
-
-## IssueInvoiceUseCase
-
-Emite la factura de un pedido pagado.
-
-**Implementado por:** `IssueInvoiceService`  
-**Rol:** Interno (después del pago).
-
-```java
-Invoice issue(Order order, List<Invoice> existing);
-```
-
-## MarkInventoryUseCase
-
-Marca un inventario como dañado, lo bloquea o lo habilita.
-
-**Implementado por:** `MarkInventoryService`  
-**Rol:** Vendedor u operador logístico.
-
-```java
-void markDamaged(User actor, Seller seller, Inventory inventory);
-void block(User actor, Seller seller, Inventory inventory);
-void enable(User actor, Seller seller, Inventory inventory);
-```
-
-## OnboardSellerUseCase
-
-Incorpora a un vendedor junto con su primera bodega, como describe el flujo 6.1.
-
-**Implementado por:** `OnboardSellerService`  
-**Rol:** Administrador.
-
-```java
-OnboardSellerService.Result onboard(User admin, User sellerUser, String warehouseName, WarehouseType warehouseType, Address warehouseAddress);
-```
-
-## PayOrderUseCase
-
-Registra el pago de un pedido.
-
-**Implementado por:** `PayOrderService`  
-**Rol:** Comprador dueño del pedido.
-
-```java
-void pay(User user, Buyer buyer, Order order, Money paidAmount);
-```
-
-## ProcessRefundUseCase
-
-Procesa un reembolso pendiente.
-
-**Implementado por:** `ProcessRefundService`  
-**Rol:** Administrador.
-
-```java
-void process(User actor, Refund refund);
-```
-
-## PublishProductUseCase
-
-Publica un producto en el catálogo.
-
-**Implementado por:** `PublishProductService`  
-**Rol:** Vendedor dueño del producto.
-
-```java
-void publish(User actor, Seller seller, Product product, List<Inventory> inventories);
-```
-
-## RegisterBuyerUseCase
-
-Crea el perfil de comprador de un usuario.
-
-**Implementado por:** `RegisterBuyerService`  
-**Rol:** Comprador.
-
-```java
-Buyer register(User user, Address mainAddress);
-```
-
-## RegisterInitialInventoryUseCase
-
-Registra las existencias iniciales de un producto en una bodega.
-
-**Implementado por:** `RegisterInitialInventoryService`  
-**Rol:** Vendedor u operador logístico.
-
-```java
-RegisterInitialInventoryService.Result register(User actor, Seller seller, Product product, Warehouse warehouse, int initialQuantity, List<Inventory> existing);
-```
-
-## RegisterProductUseCase
-
-Registra un producto nuevo de un vendedor.
-
-**Implementado por:** `RegisterProductService`  
-**Rol:** Vendedor.
-
-```java
-Product register(User actor, Seller seller, String name, String description, ProductType type, Money price);
-```
-
-## RegisterSellerUseCase
-
-Crea el perfil de vendedor de un usuario.
-
-**Implementado por:** `RegisterSellerService`  
-**Rol:** Administrador.
-
-```java
-Seller register(User admin, User sellerUser);
-```
-
-## RegisterUserUseCase
-
-Registra un usuario nuevo.
-
-**Implementado por:** `RegisterUserService`  
-**Rol:** Comprador (registro propio) o administrador.
-
-```java
-User register(User actor, FullName name, Email email, IdentityDocument document, UserRole role);
-```
-
-## RegisterWarehouseUseCase
-
-Registra bodegas del Marketplace o de un vendedor.
-
-**Implementado por:** `RegisterWarehouseService`  
-**Rol:** Administrador.
-
-```java
-Warehouse registerForMarketplace(User admin, String name, WarehouseType type, Address address);
-Warehouse registerForSeller(User admin, Seller seller, String name, WarehouseType type, Address address);
-```
-
-## RequestReturnUseCase
-
-Registra la solicitud de devolución de un pedido.
-
-**Implementado por:** `RequestReturnService`  
-**Rol:** Comprador dueño del pedido.
-
-```java
-ReturnRequest request(User user, Buyer buyer, Order order, String reason, List<ReturnRequest> existing);
-```
-
-## ResolveReturnUseCase
-
-Aprueba o rechaza una devolución.
-
-**Implementado por:** `ResolveReturnService`  
-**Rol:** Administrador.
-
-```java
-void approve(User actor, ReturnRequest returnRequest);
-void reject(User actor, ReturnRequest returnRequest);
-```
-
-## RestockInventoryUseCase
-
-Reintegra al inventario las unidades de una devolución aprobada.
-
-**Implementado por:** `RestockInventoryService`  
-**Rol:** Vendedor u operador logístico.
-
-```java
-InventoryMovement restock(User actor, Seller seller, Inventory inventory, int units, ReturnRequest returnRequest);
-```
-
-## ShipOrderUseCase
-
-Despacha un pedido: confirma la salida de inventario y actualiza envío y pedido a la vez.
-
-**Implementado por:** `ShipOrderService`  
-**Rol:** Operador logístico.
-
-```java
-List<InventoryMovement> ship(User actor, Order order, Shipment shipment, List<InventoryReservation> reservations);
+public interface SupervisorPort {
+    List<User> consultUsers(User supervisor);
+    List<Warehouse> consultWarehouses(User supervisor);
+    List<Inventory> consultInventory(User supervisor);
+    List<Order> consultOrders(User supervisor);
+}
 ```

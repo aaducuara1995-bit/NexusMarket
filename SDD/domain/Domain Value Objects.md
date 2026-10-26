@@ -164,6 +164,8 @@ Procesos de negocio que controla `AuthorizationService`.
 | `RETURN_MANAGEMENT` | Gestión de devoluciones: comprador y administrador (supuesto). |
 | `WAREHOUSE_MANAGEMENT` | Administración de bodegas: administrador. |
 | `SHIPPING_OPERATIONS` | Operación de despachos: operador logístico. |
+| `USER_MANAGEMENT` | Administración de usuarios (bloquear y reactivar): administrador. |
+| `ADMINISTRATIVE_REPORTS` | Consultas administrativas de seguimiento (OBJ-12): administrador y supervisor. |
 
 ---
 

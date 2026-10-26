@@ -3,11 +3,10 @@ package application.domain.services;
 import application.domain.entities.Buyer;
 import application.domain.entities.User;
 import application.domain.enums.UserRole;
-import application.domain.ports.in.RegisterBuyerUseCase;
 import application.domain.ports.out.BuyerRepositoryPort;
 import application.domain.valueobjects.Address;
 
-public class RegisterBuyerService implements RegisterBuyerUseCase {
+public class RegisterBuyerService {
 
     private final BuyerRepositoryPort buyers;
 

@@ -10,7 +10,7 @@ Registro de usuarios y de sus perfiles, incorporación de vendedores y administr
 
 **Quién lo ejecuta:** Administrador.
 
-**Puerto de entrada que implementa:** `OnboardSellerUseCase`
+**Lo usa:** `AdminUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`
 
@@ -36,7 +36,7 @@ Result onboard(User admin, User sellerUser, String warehouseName, WarehouseType 
 
 **Quién lo ejecuta:** Comprador.
 
-**Puerto de entrada que implementa:** `RegisterBuyerUseCase`
+**Lo usa:** `PublicAccessUseCaseImpl`
 
 **Dependencias:** `BuyerRepositoryPort buyers`
 
@@ -60,8 +60,6 @@ Buyer register(User user, Address mainAddress);
 
 **Quién lo ejecuta:** Administrador.
 
-**Puerto de entrada que implementa:** `RegisterSellerUseCase`
-
 **Dependencias:** `AuthorizationService authorization`, `SellerRepositoryPort sellers`
 
 **Operaciones:**
@@ -84,7 +82,7 @@ Seller register(User admin, User sellerUser);
 
 **Quién lo ejecuta:** Comprador (registro propio) o administrador.
 
-**Puerto de entrada que implementa:** `RegisterUserUseCase`
+**Lo usa:** `AdminUseCaseImpl`, `PublicAccessUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`, `UserRepositoryPort users`
 
@@ -109,7 +107,7 @@ User register(User actor, FullName name, Email email, IdentityDocument document,
 
 **Quién lo ejecuta:** Administrador.
 
-**Puerto de entrada que implementa:** `RegisterWarehouseUseCase`
+**Lo usa:** `AdminUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`, `WarehouseRepositoryPort warehouses`
 

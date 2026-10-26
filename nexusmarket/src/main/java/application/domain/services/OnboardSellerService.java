@@ -6,10 +6,9 @@ import application.domain.entities.Warehouse;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
 import application.domain.enums.WarehouseType;
-import application.domain.ports.in.OnboardSellerUseCase;
 import application.domain.valueobjects.Address;
 
-public class OnboardSellerService implements OnboardSellerUseCase {
+public class OnboardSellerService {
 
     public record Result(Seller seller, Warehouse warehouse) {
     }

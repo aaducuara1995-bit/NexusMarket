@@ -5,9 +5,8 @@ import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.UserRole;
 import application.domain.exceptions.AccessDeniedException;
-import application.domain.ports.in.ResolveReturnUseCase;
 
-public class ResolveReturnService implements ResolveReturnUseCase {
+public class ResolveReturnService {
 
     private final AuthorizationService authorization;
 

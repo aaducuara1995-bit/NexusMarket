@@ -6,9 +6,8 @@ import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.OrderStatus;
 import application.domain.enums.ShipmentStatus;
-import application.domain.ports.in.ConfirmDeliveryUseCase;
 
-public class ConfirmDeliveryService implements ConfirmDeliveryUseCase {
+public class ConfirmDeliveryService {
 
     private final AuthorizationService authorization;
 

@@ -10,7 +10,7 @@ Existencias distribuidas por bodega y sus cinco movimientos: ingreso, reserva, s
 
 **Quién lo ejecuta:** Vendedor u operador logístico.
 
-**Puerto de entrada que implementa:** `AdjustInventoryUseCase`
+**Lo usa:** `InventoryOperationsSupport`
 
 **Dependencias:** `InventoryAccessService access`
 
@@ -56,7 +56,7 @@ List<InventoryMovement> confirmOutflow(UUID orderId, List<InventoryReservation> 
 
 **Quién lo ejecuta:** Vendedor u operador logístico.
 
-**Puerto de entrada que implementa:** `MarkInventoryUseCase`
+**Lo usa:** `InventoryOperationsSupport`
 
 **Dependencias:** `InventoryAccessService access`
 
@@ -81,7 +81,7 @@ void enable(User actor, Seller seller, Inventory inventory);
 
 **Quién lo ejecuta:** Vendedor u operador logístico.
 
-**Puerto de entrada que implementa:** `RegisterInitialInventoryUseCase`
+**Lo usa:** `InventoryOperationsSupport`
 
 **Dependencias:** `InventoryAccessService access`
 
@@ -156,7 +156,7 @@ Result reserve(UUID orderId, Product product, int quantity, List<Inventory> inve
 
 **Quién lo ejecuta:** Vendedor u operador logístico.
 
-**Puerto de entrada que implementa:** `RestockInventoryUseCase`
+**Lo usa:** `InventoryOperationsSupport`
 
 **Dependencias:** `InventoryAccessService access`
 

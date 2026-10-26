@@ -8,11 +8,10 @@ import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
 import application.domain.enums.OrderStatus;
 import application.domain.enums.ShipmentStatus;
-import application.domain.ports.in.ShipOrderUseCase;
 
 import java.util.List;
 
-public class ShipOrderService implements ShipOrderUseCase {
+public class ShipOrderService {
 
     private final AuthorizationService authorization;
     private final InventoryOutflowService inventoryOutflow;

@@ -443,6 +443,7 @@ Compromiso comercial formal de un comprador. Su ciclo de vida es el proceso cent
 | `buyer` | `Buyer` | Comprador que realizó el pedido. |
 | `items` | `List<OrderItem>` | Líneas del pedido, copiadas del carrito al confirmarlo. |
 | `date` | `LocalDateTime` | Fecha y hora de creación. |
+| `deliveryAddress` | `Address` | Dirección de entrega que eligió el comprador al confirmar. Si no elige, se usa su dirección principal. |
 | `status` | `OrderStatus` | Estado del pedido. Nace `PENDING_PAYMENT`. |
 
 ## Comportamiento
@@ -468,6 +469,7 @@ Compromiso comercial formal de un comprador. Su ciclo de vida es el proceso cent
 * Los estados avanzan en orden: `PENDING_PAYMENT`, `PAID`, `SHIPPED`, `DELIVERED`.
 * Un pedido finalizado no puede modificarse bajo ninguna circunstancia (validación crítica de Pedidos).
 * La etapa `CART` del ciclo se representa con la entidad `Cart`.
+* La dirección de entrega debe ser una de las direcciones registradas del comprador.
 
 ---
 

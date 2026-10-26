@@ -3,11 +3,10 @@ package application.domain.services;
 import application.domain.entities.Order;
 import application.domain.entities.Refund;
 import application.domain.entities.ReturnRequest;
-import application.domain.ports.in.GenerateRefundUseCase;
 
 import java.util.List;
 
-public class GenerateRefundService implements GenerateRefundUseCase {
+public class GenerateRefundService {
 
     public Refund generate(ReturnRequest returnRequest, List<Refund> existing) {
         if (returnRequest == null)

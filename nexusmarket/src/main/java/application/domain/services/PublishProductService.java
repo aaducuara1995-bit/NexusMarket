@@ -5,11 +5,10 @@ import application.domain.entities.Product;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.enums.BusinessProcess;
-import application.domain.ports.in.PublishProductUseCase;
 
 import java.util.List;
 
-public class PublishProductService implements PublishProductUseCase {
+public class PublishProductService {
 
     private final AuthorizationService authorization;
     private final SellerValidationService sellerValidation;

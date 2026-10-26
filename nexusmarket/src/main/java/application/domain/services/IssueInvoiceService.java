@@ -2,11 +2,10 @@ package application.domain.services;
 
 import application.domain.entities.Invoice;
 import application.domain.entities.Order;
-import application.domain.ports.in.IssueInvoiceUseCase;
 
 import java.util.List;
 
-public class IssueInvoiceService implements IssueInvoiceUseCase {
+public class IssueInvoiceService {
 
     public Invoice issue(Order order, List<Invoice> existing) {
         if (order == null)

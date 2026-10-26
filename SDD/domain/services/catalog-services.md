@@ -10,7 +10,7 @@ Registro y ciclo de vida de los productos (Dominio 5).
 
 **Quién lo ejecuta:** Vendedor dueño del producto.
 
-**Puerto de entrada que implementa:** `ChangeProductStatusUseCase`
+**Lo usa:** `SellerUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`, `SellerValidationService sellerValidation`
 
@@ -34,7 +34,7 @@ void discontinue(User actor, Seller seller, Product product, List<Inventory> inv
 
 **Quién lo ejecuta:** Cualquier usuario (consulta).
 
-**Puerto de entrada que implementa:** `CheckAvailabilityUseCase`
+**Lo usa:** `PublicAccessUseCaseImpl`
 
 **Dependencias:** ninguna
 
@@ -58,7 +58,7 @@ boolean hasAvailability(Product product, int quantity, List<Inventory> inventori
 
 **Quién lo ejecuta:** Vendedor dueño del producto.
 
-**Puerto de entrada que implementa:** `PublishProductUseCase`
+**Lo usa:** `SellerUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`, `SellerValidationService sellerValidation`
 
@@ -82,7 +82,7 @@ void publish(User actor, Seller seller, Product product, List<Inventory> invento
 
 **Quién lo ejecuta:** Vendedor.
 
-**Puerto de entrada que implementa:** `RegisterProductUseCase`
+**Lo usa:** `SellerUseCaseImpl`
 
 **Dependencias:** `AuthorizationService authorization`, `SellerValidationService sellerValidation`, `ProductRepositoryPort products`
 

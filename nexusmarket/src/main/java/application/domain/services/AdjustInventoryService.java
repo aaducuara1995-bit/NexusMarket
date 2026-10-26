@@ -5,9 +5,8 @@ import application.domain.entities.InventoryMovement;
 import application.domain.entities.Seller;
 import application.domain.entities.User;
 import application.domain.enums.MovementType;
-import application.domain.ports.in.AdjustInventoryUseCase;
 
-public class AdjustInventoryService implements AdjustInventoryUseCase {
+public class AdjustInventoryService {
 
     private final InventoryAccessService access;
 

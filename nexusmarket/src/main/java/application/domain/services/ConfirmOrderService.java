@@ -10,12 +10,11 @@ import application.domain.entities.Order;
 import application.domain.entities.User;
 import application.domain.exceptions.AccessDeniedException;
 import application.domain.valueobjects.Address;
-import application.domain.ports.in.ConfirmOrderUseCase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfirmOrderService implements ConfirmOrderUseCase {
+public class ConfirmOrderService {
 
     public record Result(Order order,
                             List<InventoryReservation> reservations,
