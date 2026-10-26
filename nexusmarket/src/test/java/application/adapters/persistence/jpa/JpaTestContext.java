@@ -1,6 +1,9 @@
 package application.adapters.persistence.jpa;
 
+import application.adapters.persistence.FakeSpringDataRepository;
 import application.adapters.persistence.jpa.repositories.*;
+import application.adapters.persistence.mongodb.AuditLogMongoAdapter;
+import application.adapters.persistence.mongodb.repositories.AuditLogMongoRepository;
 import application.adapters.useCases.AdminUseCaseImpl;
 import application.adapters.useCases.BuyerUseCaseImpl;
 import application.adapters.useCases.InventoryOperationsSupport;
@@ -11,7 +14,8 @@ import application.adapters.useCases.SupervisorUseCaseImpl;
 import application.domain.services.*;
 
 /**
- * The six use cases wired to the real JPA adapters. Only the Spring Data repositories
+ * The six use cases wired to the real JPA adapters and the MongoDB audit adapter.
+ * Only the Spring Data repositories
  * are replaced by in-memory fakes, so everything from the use case down to the
  * mappers runs as it will with MySQL.
  */
@@ -49,7 +53,8 @@ final class JpaTestContext {
     final ShipmentJpaAdapter shipments = new ShipmentJpaAdapter(shipmentRows, resolver);
     final ReturnRequestJpaAdapter returns = new ReturnRequestJpaAdapter(returnRows, resolver);
     final RefundJpaAdapter refunds = new RefundJpaAdapter(refundRows, resolver);
-    final InMemoryRepositories.AuditLogs auditLogs = new InMemoryRepositories.AuditLogs();
+    final AuditLogMongoAdapter auditLogs =
+            new AuditLogMongoAdapter(FakeSpringDataRepository.of(AuditLogMongoRepository.class));
 
     final PublicAccessUseCaseImpl publicAccess;
     final BuyerUseCaseImpl buyerUseCase;

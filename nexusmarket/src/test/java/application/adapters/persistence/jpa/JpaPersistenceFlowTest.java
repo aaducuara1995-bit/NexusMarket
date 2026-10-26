@@ -8,6 +8,7 @@ import application.domain.entities.Refund;
 import application.domain.entities.ReturnRequest;
 import application.domain.entities.User;
 import application.domain.entities.Warehouse;
+import application.domain.enums.AuditOperation;
 import application.domain.enums.MovementType;
 import application.domain.enums.OrderStatus;
 import application.domain.enums.ProductType;
@@ -176,5 +177,6 @@ class JpaPersistenceFlowTest {
 
         assertEquals(UserStatus.BLOCKED, ctx.users.findById(supervisor.getId()).orElseThrow().getStatus());
         assertEquals(2, ctx.supervisorUseCase.consultUsers(admin).size());
+        assertEquals(AuditOperation.USER_BLOCKING, ctx.adminUseCase.consultAuditLog(admin).get(0).getOperation());
     }
 }

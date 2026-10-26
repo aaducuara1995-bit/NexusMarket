@@ -1,4 +1,4 @@
-package application.adapters.persistence.jpa;
+package application.adapters.persistence;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -10,18 +10,19 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * In-memory stand-in for a Spring Data JPA repository, for tests without MySQL.
+ * In-memory stand-in for a Spring Data repository (JPA or MongoDB), for tests without
+ * MySQL or MongoDB.
  * It answers findById, findAll, save, saveAll and existsById, and derives the other
  * query methods from their names, as Spring Data does: findByOrderId,
  * existsBySellerIdAndNameIgnoreCase, findByStatus...
  */
-final class FakeSpringDataRepository {
+public final class FakeSpringDataRepository {
 
     private FakeSpringDataRepository() {
     }
 
     @SuppressWarnings("unchecked")
-    static <R> R of(Class<R> repositoryInterface) {
+    public static <R> R of(Class<R> repositoryInterface) {
         Map<Object, Object> rows = new LinkedHashMap<>();
         return (R) Proxy.newProxyInstance(repositoryInterface.getClassLoader(),
                 new Class<?>[]{repositoryInterface},

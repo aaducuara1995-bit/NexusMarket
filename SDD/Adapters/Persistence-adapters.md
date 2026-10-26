@@ -5,8 +5,8 @@
 Los adaptadores de persistencia están en `adapters/persistence/` e implementan los puertos de salida de `domain/ports/out/`. Siguen las reglas del proyecto de referencia:
 
 1. Las entidades del dominio nunca se usan como tablas. Cada adaptador tiene sus propias **entidades de persistencia** (los DTO del repositorio), sus **mappers** (dominio ↔ entidad) y sus **repositorios de Spring Data**.
-2. **Spring Data JPA con MySQL** guarda los datos del negocio (14 puertos).
-3. **Spring Data MongoDB** guarda la auditoría (`AuditLogRepositoryPort`), igual que en el ejemplo del profesor.
+2. **Spring Data JPA con MySQL** guarda los datos del negocio (14 puertos, sección 6).
+3. **Spring Data MongoDB** guarda la auditoría (`AuditLogRepositoryPort`, sección 7), igual que en el ejemplo del profesor.
 
 ---
 
@@ -33,12 +33,17 @@ MySQL
 
 ```text
 adapters/persistence/
-└── jpa/
-    ├── entities/        14 entidades JPA y 3 @Embeddable (dirección, línea de carrito, línea de pedido)
-    ├── mappers/         un mapper por agregado y CommonJpaMapper (ids, direcciones, dinero)
-    ├── repositories/    14 interfaces SpringDataJpaXxxRepository
-    ├── JpaReferenceResolver.java   reconstruye los objetos referenciados por id
-    └── XxxJpaAdapter.java          14 adaptadores, uno por puerto
+├── jpa/
+│   ├── entities/        14 entidades JPA y 3 @Embeddable (dirección, línea de carrito, línea de pedido)
+│   ├── mappers/         un mapper por agregado y CommonJpaMapper (ids, direcciones, dinero)
+│   ├── repositories/    14 interfaces SpringDataJpaXxxRepository
+│   ├── JpaReferenceResolver.java   reconstruye los objetos referenciados por id
+│   └── XxxJpaAdapter.java          14 adaptadores, uno por puerto
+└── mongodb/
+    ├── documents/       AuditLogDocument (colección audit_logs)
+    ├── mappers/         AuditLogMongoMapper
+    ├── repositories/    AuditLogMongoRepository
+    └── AuditLogMongoAdapter.java   implementa AuditLogRepositoryPort
 ```
 
 ---
@@ -251,6 +256,28 @@ Tabla hija `return_restocked_units`, unida por `return_id`.
 
 ---
 
-## 7. Pruebas
+## 7. Auditoría en MongoDB
 
-`JpaPersistenceFlowTest` arma los seis casos de uso sobre los 14 adaptadores JPA reales y reemplaza solo los repositorios de Spring Data por `FakeSpringDataRepository`, un repositorio en memoria que deduce las consultas de su nombre (`findByOrderId`, `existsBySellerIdAndNameIgnoreCase`), como hace Spring Data. Recorre la compra física completa (con devolución, reembolso y reintegro), la compra digital, la unicidad de correo, bodega y producto, y el bloqueo de usuarios. Cada paso vuelve a leer lo que guardó el anterior, así que comprueba que mappers y adaptadores conservan ids, estados y referencias.
+La auditoría sigue el mismo patrón del proyecto de referencia (`AuditLogMongoAdapter`). Se guarda en la base `nexusmarket_audit`, colección `audit_logs`, con un documento por operación.
+
+| Campo del documento | Tipo | Contenido |
+|---|---|---|
+| `_id` (`id`) | `String` | id del registro (UUID como texto) |
+| `operation` | `String` | nombre del `AuditOperation`, por ejemplo `ORDER_PAYMENT` |
+| `date` | `LocalDateTime` | fecha y hora de la operación |
+| `performedByUserId` | `String` | usuario que la hizo |
+| `performedByRole` | `String` | rol del usuario en ese momento |
+| `affectedEntityId` | `String` | registro afectado (pedido, producto, usuario...) |
+| `details` | `Map<String, String>` | datos adicionales, como el nuevo estado o el monto |
+
+* **Por qué MongoDB.** La auditoría solo crece, no tiene relaciones con otras tablas y cada registro trae detalles distintos según la operación. Un documento flexible encaja mejor que una tabla con columnas fijas.
+* **Independiente del dominio.** Los enums se guardan como texto y las referencias como ids, así que el registro se puede leer aunque el pedido o el usuario cambien después.
+* **Consultas.** `AuditLogMongoRepository` deduce `findByPerformedByUserId` y `findByAffectedEntityId` del nombre del método.
+
+---
+
+## 8. Pruebas
+
+`JpaPersistenceFlowTest` arma los seis casos de uso sobre los 14 adaptadores JPA reales y reemplaza solo los repositorios de Spring Data por `FakeSpringDataRepository`, un repositorio en memoria que deduce las consultas de su nombre (`findByOrderId`, `existsBySellerIdAndNameIgnoreCase`), como hace Spring Data. Recorre la compra física completa (con devolución, reembolso y reintegro), la compra digital, la unicidad de correo, bodega y producto, y el bloqueo de usuarios. Cada paso vuelve a leer lo que guardó el anterior, así que comprueba que mappers y adaptadores conservan ids, estados y referencias. La auditoría de ese flujo pasa por el `AuditLogMongoAdapter` real.
+
+`AuditLogMongoAdapterTest` comprueba que el documento guarda los enums como texto, que un registro se lee exactamente como se guardó y que las búsquedas por usuario y por registro afectado funcionan.
