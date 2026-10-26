@@ -9,6 +9,7 @@ import application.domain.entities.InventoryReservation;
 import application.domain.entities.Order;
 import application.domain.entities.User;
 import application.domain.exceptions.AccessDeniedException;
+import application.domain.valueobjects.Address;
 import application.domain.ports.in.ConfirmOrderUseCase;
 
 import java.util.ArrayList;
@@ -37,6 +38,12 @@ public class ConfirmOrderService implements ConfirmOrderUseCase {
 
     public Result confirm(User user, Buyer buyer, Cart cart,
                                List<Inventory> inventories) {
+        return confirm(user, buyer, cart, inventories, null);
+    }
+
+    /** Confirms the cart using the delivery address chosen by the buyer (main address if null). */
+    public Result confirm(User user, Buyer buyer, Cart cart,
+                          List<Inventory> inventories, Address deliveryAddress) {
         buyerValidation.requireEnabled(user, buyer);
         if (cart == null)
             throw new IllegalArgumentException("Cart is required.");
@@ -53,7 +60,7 @@ public class ConfirmOrderService implements ConfirmOrderUseCase {
                         "Product " + item.getProduct().getName() + " is no longer published.");
         }
 
-        Order order = new Order(cart);
+        Order order = new Order(cart, deliveryAddress);
         List<InventoryReservation> reservations = new ArrayList<>();
         List<InventoryMovement> movements = new ArrayList<>();
 

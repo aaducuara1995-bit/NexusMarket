@@ -37,6 +37,12 @@ public class AuthorizationService {
         // Assumption: handled like refunds (the specification does not define it)
         PERMISSIONS.put(BusinessProcess.RETURN_MANAGEMENT,
                 EnumSet.of(UserRole.BUYER, UserRole.ADMIN));
+
+        // User administration (section 3.1) and administrative reports (OBJ-12)
+        PERMISSIONS.put(BusinessProcess.USER_MANAGEMENT,
+                EnumSet.of(UserRole.ADMIN));
+        PERMISSIONS.put(BusinessProcess.ADMINISTRATIVE_REPORTS,
+                EnumSet.of(UserRole.ADMIN, UserRole.SUPERVISOR));
     }
 
     public boolean canExecute(User user, BusinessProcess process) {

@@ -55,10 +55,21 @@ class AuthorizationServiceTest {
     }
 
     @Test
-    void supervisorExecutesNoProcess() {
+    void supervisorOnlyConsultsReports() {
         User supervisor = user(UserRole.SUPERVISOR);
-        for (BusinessProcess process : BusinessProcess.values())
-            assertFalse(service.canExecute(supervisor, process));
+        for (BusinessProcess process : BusinessProcess.values()) {
+            if (process == BusinessProcess.ADMINISTRATIVE_REPORTS)
+                assertTrue(service.canExecute(supervisor, process));
+            else
+                assertFalse(service.canExecute(supervisor, process));
+        }
+    }
+
+    @Test
+    void onlyTheAdminManagesUsers() {
+        assertTrue(service.canExecute(user(UserRole.ADMIN), BusinessProcess.USER_MANAGEMENT));
+        assertFalse(service.canExecute(user(UserRole.SUPERVISOR), BusinessProcess.USER_MANAGEMENT));
+        assertFalse(service.canExecute(user(UserRole.BUYER), BusinessProcess.USER_MANAGEMENT));
     }
 
     @Test

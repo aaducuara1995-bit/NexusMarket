@@ -1,6 +1,7 @@
 package application.domain.entities;
 
 import application.domain.enums.OrderStatus;
+import application.domain.valueobjects.Address;
 import application.domain.valueobjects.Money;
 
 import java.math.BigDecimal;
@@ -16,15 +17,29 @@ public class Order {
     private final Buyer buyer;
     private final List<OrderItem> items = new ArrayList<>();
     private final LocalDateTime date;
+    private final Address deliveryAddress;
     private OrderStatus status;
 
     public Order(Cart cart) {
+        this(cart, null);
+    }
+
+    /**
+     * Creates the order with the delivery address chosen by the buyer.
+     * Without a chosen address, the buyer's main address is used.
+     */
+    public Order(Cart cart, Address deliveryAddress) {
         if (cart == null)
             throw new IllegalArgumentException("Cart is required.");
         if (cart.getItems().isEmpty())
             throw new IllegalArgumentException("Cannot create an order from an empty cart.");
 
+        Address address = deliveryAddress == null ? cart.getBuyer().getMainAddress() : deliveryAddress;
+        if (!cart.getBuyer().hasAddress(address))
+            throw new IllegalArgumentException("The delivery address does not belong to the buyer.");
+
         this.id = UUID.randomUUID();
+        this.deliveryAddress = address;
         this.buyer = cart.getBuyer();
         cart.getItems().forEach(
                 i -> items.add(new OrderItem(i.getProduct(), i.getQuantity())));
@@ -74,6 +89,7 @@ public class Order {
     public UUID getId() { return id; }
     public Buyer getBuyer() { return buyer; }
     public LocalDateTime getDate() { return date; }
+    public Address getDeliveryAddress() { return deliveryAddress; }
     public OrderStatus getStatus() { return status; }
     public List<OrderItem> getItems() { return Collections.unmodifiableList(items); }
 }
