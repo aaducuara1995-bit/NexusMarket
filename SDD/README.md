@@ -14,7 +14,8 @@ SDD
 │   ├── Input-ports.md             puertos de entrada por rol
 │   └── Output-ports.md            puertos de salida (repositorios)
 └── Adapters
-    └── Use-cases-adapters.md      casos de uso que implementan los puertos por rol
+    ├── Use-cases-adapters.md      casos de uso que implementan los puertos por rol
+    └── Persistence-adapters.md    adaptadores JPA (MySQL), tablas y decisiones de persistencia
 ```
 
 ## Estructura del código
@@ -31,7 +32,9 @@ application
 │       ├── in          6 puertos de entrada, uno por rol más el acceso público
 │       └── out         15 puertos de salida (14 MySQL, 1 MongoDB)
 └── adapters
-    └── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
+    ├── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
+    └── persistence
+        └── jpa         14 adaptadores MySQL con sus entidades, mappers y repositorios
 ```
 
-Las reglas del dominio y los flujos de los casos de uso están cubiertos por 230 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
+Las reglas del dominio y los flujos de los casos de uso están cubiertos por 234 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
