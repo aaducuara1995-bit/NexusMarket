@@ -1,0 +1,41 @@
+# Databases for NexusMarket, following the reference project.
+# Start them with:  docker compose up -d     (from the NexusMarket folder)
+# Stop them with:   docker compose down      (the data stays in the volumes)
+# Host ports 3307 and 27018 avoid clashing with a MySQL or MongoDB installed on Windows.
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: nexusmarket-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: nexusmarket_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-nexus_root_password}
+      MYSQL_USER: nexus_app
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nexus_app_password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mongo-db:
+    image: mongo:6.0
+    container_name: nexusmarket-mongo
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql_data:
+  mongo_data:

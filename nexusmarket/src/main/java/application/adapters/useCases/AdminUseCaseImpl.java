@@ -23,11 +23,15 @@ import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterUserService;
 import application.domain.services.RegisterWarehouseService;
 import application.domain.services.ResolveReturnService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
 /** Operations of the ADMIN role: users, sellers, warehouses and after-sales decisions. */
+@Service
+@Transactional
 public class AdminUseCaseImpl implements AdminPort {
 
     private final AuthorizationService authorizationService;

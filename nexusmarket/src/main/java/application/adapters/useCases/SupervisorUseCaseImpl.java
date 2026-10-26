@@ -13,11 +13,15 @@ import application.domain.ports.out.UserRepositoryPort;
 import application.domain.ports.out.WarehouseRepositoryPort;
 import application.domain.services.AuthorizationService;
 import application.domain.services.ConsultAuditLogService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 /** Read-only follow-up of the SUPERVISOR role (OBJ-12). Nothing here changes data. */
+@Service
+@Transactional(readOnly = true)
 public class SupervisorUseCaseImpl implements SupervisorPort {
 
     private final AuthorizationService authorizationService;

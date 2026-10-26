@@ -18,6 +18,7 @@ import application.domain.services.MarkInventoryService;
 import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterInitialInventoryService;
 import application.domain.services.RestockInventoryService;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Map;
  * their own so ownership is checked, the operator passes null because they may operate
  * on any product.
  */
+@Component
 public class InventoryOperationsSupport {
 
     private final RegisterInitialInventoryService registerInitialInventoryService;

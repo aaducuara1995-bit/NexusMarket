@@ -32,6 +32,7 @@ application
 │       ├── in          6 puertos de entrada, uno por rol más el acceso público
 │       └── out         15 puertos de salida (14 MySQL, 1 MongoDB)
 └── adapters
+    ├── config          DomainServicesConfig (servicios como beans) y BootstrapAdminRunner
     ├── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
     └── persistence
         ├── jpa         14 adaptadores MySQL con sus entidades, mappers y repositorios
@@ -39,3 +40,11 @@ application
 ```
 
 Las reglas del dominio y los flujos de los casos de uso están cubiertos por 237 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
+
+## Cómo levantar la aplicación
+
+```powershell
+docker compose up -d          # desde la carpeta NexusMarket: MySQL y MongoDB
+cd nexusmarket
+.\mvnw spring-boot:run        # crea las tablas, la colección y el administrador inicial
+```

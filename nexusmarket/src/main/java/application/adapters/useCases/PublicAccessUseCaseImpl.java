@@ -12,11 +12,15 @@ import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterBuyerService;
 import application.domain.services.RegisterUserService;
 import application.domain.valueobjects.Address;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
 /** Operations anyone can use without signing in: buyer sign-up and the public catalog. */
+@Service
+@Transactional
 public class PublicAccessUseCaseImpl implements PublicAccessPort {
 
     private final RegisterUserService registerUserService;

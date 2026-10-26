@@ -20,11 +20,15 @@ import application.domain.services.ChangeProductStatusService;
 import application.domain.services.PublishProductService;
 import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RegisterProductService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
 /** Operations of the SELLER role: their catalog and the inventory of their products. */
+@Service
+@Transactional
 public class SellerUseCaseImpl implements SellerPort {
 
     private final AuthorizationService authorizationService;

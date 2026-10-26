@@ -85,8 +85,11 @@ public Order shipOrder(User user, Order order) {
 
 ---
 
-## 6. Pendiente para la Fase B
+## 6. Conexión con Spring
 
-Las clases todavía no tienen `@Service`, porque Spring necesita las implementaciones reales de los repositorios para construirlas. En la Fase B se agregan los adaptadores de MySQL, las anotaciones y una clase de configuración que registra los servicios de dominio como beans, sin poner anotaciones de Spring dentro de `domain`.
+* **Casos de uso.** Las seis clases tienen `@Service` y `@Transactional`: si una operación falla a mitad de camino, MySQL deshace todo lo que alcanzó a guardar. `SupervisorUseCaseImpl` usa `@Transactional(readOnly = true)` porque solo consulta. `InventoryOperationsSupport` es un `@Component` que corre dentro de la transacción del caso de uso que lo llama.
+* **Servicios de dominio.** `adapters/config/DomainServicesConfig` los registra como beans con métodos `@Bean`. Así el paquete `domain` no tiene ninguna anotación de Spring y sigue siendo Java puro.
+* **Puertos de salida.** Spring inyecta en cada puerto su adaptador de persistencia: JPA para MySQL y MongoDB para la auditoría (ver `Persistence-adapters.md`).
+* **Auditoría y transacciones.** La transacción es de MySQL. El registro en MongoDB se escribe al final de cada operación, después de los guardados en MySQL. Si la operación falla antes de ese punto, no queda auditoría.
 
-Mientras tanto, las pruebas de `src/test/java/application/adapters/useCases/` arman los seis casos de uso con los servicios reales y repositorios en memoria, y recorren el flujo completo del negocio.
+Las pruebas de `src/test/java/application/adapters/useCases/` arman los seis casos de uso con los servicios reales y repositorios en memoria, y recorren el flujo completo del negocio sin necesitar Spring ni bases de datos.

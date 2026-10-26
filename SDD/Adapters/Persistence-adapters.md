@@ -281,3 +281,24 @@ La auditoría sigue el mismo patrón del proyecto de referencia (`AuditLogMongoA
 `JpaPersistenceFlowTest` arma los seis casos de uso sobre los 14 adaptadores JPA reales y reemplaza solo los repositorios de Spring Data por `FakeSpringDataRepository`, un repositorio en memoria que deduce las consultas de su nombre (`findByOrderId`, `existsBySellerIdAndNameIgnoreCase`), como hace Spring Data. Recorre la compra física completa (con devolución, reembolso y reintegro), la compra digital, la unicidad de correo, bodega y producto, y el bloqueo de usuarios. Cada paso vuelve a leer lo que guardó el anterior, así que comprueba que mappers y adaptadores conservan ids, estados y referencias. La auditoría de ese flujo pasa por el `AuditLogMongoAdapter` real.
 
 `AuditLogMongoAdapterTest` comprueba que el documento guarda los enums como texto, que un registro se lee exactamente como se guardó y que las búsquedas por usuario y por registro afectado funcionan.
+
+---
+
+## 9. Configuración y bases de datos
+
+Las dos bases corren en Docker con el `docker-compose.yml` de la raíz del repositorio, igual que en el proyecto de referencia:
+
+| Servicio | Imagen | Puerto en el computador | Base |
+|---|---|---|---|
+| `mysql-db` (`nexusmarket-mysql`) | `mysql:8.0` | 3307 | `nexusmarket_db`, usuario `nexus_app` |
+| `mongo-db` (`nexusmarket-mongo`) | `mongo:6.0` | 27018 | `nexusmarket_audit` |
+
+Los puertos 3307 y 27018 evitan choques con un MySQL o un MongoDB instalados en Windows, que usan 3306 y 27017.
+
+`application.properties` apunta a esos contenedores por defecto. Cada valor se puede cambiar con una variable de entorno sin tocar el archivo: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y `MONGODB_URI`.
+
+* `spring.jpa.hibernate.ddl-auto=update`: Hibernate crea las tablas la primera vez y agrega columnas nuevas después, sin borrar datos.
+* `spring.jpa.open-in-view=false`: la conexión a MySQL se usa solo dentro de los casos de uso.
+* `spring.mongodb.uri`: Spring Boot 4 usa el prefijo `spring.mongodb`, como anota el proyecto de referencia.
+
+Al arrancar, `BootstrapAdminRunner` revisa si existe algún administrador y, si no hay ninguno, crea el inicial (`admin@nexusmarket.com` por defecto, configurable con `ADMIN_EMAIL` y `ADMIN_DOCUMENT`). Hace falta porque solo un administrador puede registrar los roles internos.

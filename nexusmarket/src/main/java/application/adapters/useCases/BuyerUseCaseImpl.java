@@ -36,12 +36,16 @@ import application.domain.services.RegisterAuditLogService;
 import application.domain.services.RequestReturnService;
 import application.domain.valueobjects.Address;
 import application.domain.valueobjects.Money;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /** Operations of the BUYER role: cart, order, payment and returns. */
+@Service
+@Transactional
 public class BuyerUseCaseImpl implements BuyerPort {
 
     private final AuthorizationService authorizationService;

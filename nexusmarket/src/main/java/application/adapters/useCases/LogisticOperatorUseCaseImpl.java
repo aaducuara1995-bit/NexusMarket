@@ -25,11 +25,15 @@ import application.domain.services.AuthorizationService;
 import application.domain.services.ConfirmDeliveryService;
 import application.domain.services.RegisterAuditLogService;
 import application.domain.services.ShipOrderService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
 /** Operations of the LOGISTIC_OPERATOR role: warehouse stock and order shipping. */
+@Service
+@Transactional
 public class LogisticOperatorUseCaseImpl implements LogisticOperatorPort {
 
     private final AuthorizationService authorizationService;
