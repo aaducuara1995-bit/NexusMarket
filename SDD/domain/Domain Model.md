@@ -6,7 +6,7 @@ El modelo de dominio representa las entidades del negocio de NexusMarket, un mar
 
 Las entidades tienen identidad propia, cambian de estado con el tiempo y protegen sus propias reglas: un inventario nunca queda negativo, un pedido entregado ya no se modifica y un producto descontinuado no vuelve a publicarse. Las reglas que involucran a varias entidades a la vez se documentan en `Domain Services.md`.
 
-El código está en inglés y esta documentación en español. Cada nombre de clase, atributo y método de este documento coincide exactamente con el código en `nexus/src/main/java/application/domain/entities/`.
+El código está en inglés y esta documentación en español. Cada nombre de clase, atributo y método de este documento coincide exactamente con el código en `nexusmarket/src/main/java/application/domain/entities/`.
 
 ---
 

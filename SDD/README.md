@@ -1,6 +1,6 @@
 # SDD de NexusMarket
 
-Especificación del diseño de software de NexusMarket, construida a partir de la especificación funcional del negocio. La documentación está en español; el código Java está en inglés, y cada clase, atributo y método nombrado aquí coincide con el código en `nexus/src/main/java/application/domain/`.
+Especificación del diseño de software de NexusMarket, construida a partir de la especificación funcional del negocio. La documentación está en español; el código Java está en inglés, y cada clase, atributo y método nombrado aquí coincide con el código en `nexusmarket/src/main/java/application/domain/`.
 
 ## Contenido
 
@@ -29,4 +29,4 @@ domain
     └── out         5 puertos de salida
 ```
 
-Las reglas del dominio están cubiertas por 174 pruebas automáticas con JUnit en `nexus/src/test/java/application/domain/services/`.
+Las reglas del dominio están cubiertas por 174 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/domain/services/`.
