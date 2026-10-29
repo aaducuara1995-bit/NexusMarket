@@ -1,7 +1,10 @@
 package application.adapters.rest;
 
 import application.adapters.rest.controllers.AdminRestController;
+import application.adapters.rest.controllers.BuyerRestController;
+import application.adapters.rest.controllers.LogisticOperatorRestController;
 import application.adapters.rest.controllers.PublicAccessRestController;
+import application.adapters.rest.controllers.SellerRestController;
 import application.adapters.rest.controllers.SupervisorRestController;
 import application.adapters.rest.exception.GlobalExceptionHandler;
 import application.adapters.useCases.AdminUseCaseImpl;
@@ -56,6 +59,9 @@ public final class RestTestContext {
     public final PublicAccessRestController publicController;
     public final AdminRestController adminController;
     public final SupervisorRestController supervisorController;
+    public final SellerRestController sellerController;
+    public final LogisticOperatorRestController logisticController;
+    public final BuyerRestController buyerController;
 
     public final User admin;
 
@@ -100,6 +106,9 @@ public final class RestTestContext {
         publicController = new PublicAccessRestController(publicAccess, loader);
         adminController = new AdminRestController(adminUseCase, currentUser, loader);
         supervisorController = new SupervisorRestController(supervisorUseCase, currentUser);
+        sellerController = new SellerRestController(sellerUseCase, currentUser, loader);
+        logisticController = new LogisticOperatorRestController(logisticUseCase, currentUser, loader);
+        buyerController = new BuyerRestController(buyerUseCase, currentUser, loader);
 
         admin = new User(new FullName("Administrador", "NexusMarket"), new Email("admin@nexusmarket.com"),
                 new IdentityDocument("1000000000"), UserRole.ADMIN);

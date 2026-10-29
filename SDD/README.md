@@ -14,6 +14,9 @@ SDD
 │   ├── Input-ports.md             puertos de entrada por rol
 │   └── Output-ports.md            puertos de salida (repositorios)
 └── Adapters
+    ├── Api-rest-endpoints.md      los 46 endpoints por rol, con cuerpos y respuestas
+    ├── Rest-adapters.md           controladores, DTOs, mappers y decisiones de la capa REST
+    ├── Global-exception-handler.md  cómo cada error se convierte en código HTTP
     ├── Use-cases-adapters.md      casos de uso que implementan los puertos por rol
     └── Persistence-adapters.md    adaptadores JPA (MySQL) y MongoDB, tablas, documentos y decisiones
 ```
@@ -33,13 +36,15 @@ application
 │       └── out         15 puertos de salida (14 MySQL, 1 MongoDB)
 └── adapters
     ├── config          DomainServicesConfig (servicios como beans) y BootstrapAdminRunner
+    ├── rest            6 controladores REST con sus DTOs, mappers y manejo de errores
+    ├── security        configuración de seguridad (temporal hasta la Fase D)
     ├── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
     └── persistence
         ├── jpa         14 adaptadores MySQL con sus entidades, mappers y repositorios
         └── mongodb     adaptador de auditoría con su documento, mapper y repositorio
 ```
 
-Las reglas del dominio y los flujos de los casos de uso están cubiertos por 237 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
+Las reglas del dominio y los flujos de los casos de uso están cubiertos por 253 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
 
 ## Cómo levantar la aplicación
 
@@ -59,3 +64,5 @@ cd nexusmarket
 ```
 
 En los dos casos Hibernate crea las tablas, se crea la colección de auditoría y, si no hay ningún administrador, se crea el inicial.
+
+Con la aplicación arriba, la API queda en `http://localhost:8080/api/v1/...`. La lista completa está en `Adapters/Api-rest-endpoints.md`.

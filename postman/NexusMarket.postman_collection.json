@@ -1,0 +1,1624 @@
+{
+  "info": {
+    "_postman_id": "00000000-004e-6578-7573-4d61726b6574",
+    "name": "NexusMarket API",
+    "description": "Flujo completo de NexusMarket (Fase C). Ejecutar en orden con el Runner de Postman. Cada petición guarda los ids que necesita la siguiente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Preparación y público",
+      "item": [
+        {
+          "name": "Preparar datos de esta corrida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Cada corrida usa correos y documentos nuevos para no chocar con los de la anterior.",
+                  "const run = Date.now().toString();",
+                  "pm.collectionVariables.set(\"run\", run);",
+                  "pm.collectionVariables.set(\"sellerEmail\", \"vendedor\" + run + \"@nexus.com\");",
+                  "pm.collectionVariables.set(\"operatorEmail\", \"operador\" + run + \"@nexus.com\");",
+                  "pm.collectionVariables.set(\"supervisorEmail\", \"supervisor\" + run + \"@nexus.com\");",
+                  "pm.collectionVariables.set(\"buyerEmail\", \"comprador\" + run + \"@nexus.com\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar comprador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"buyerUserId\", pm.response.json().userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/buyers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "buyers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstNames\": \"Carla\",\n  \"lastNames\": \"Compradora\",\n  \"email\": \"{{buyerEmail}}\",\n  \"document\": \"{{run}}4\",\n  \"mainAddress\": {\n    \"street\": \"Calle 10 # 20-30\",\n    \"city\": \"Medellin\",\n    \"department\": \"Antioquia\",\n    \"postalCode\": \"050001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Administrador",
+      "item": [
+        {
+          "name": "Registrar usuario vendedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"sellerUserId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstNames\": \"Vera\",\n  \"lastNames\": \"Vendedora\",\n  \"email\": \"{{sellerEmail}}\",\n  \"document\": \"{{run}}1\",\n  \"role\": \"SELLER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar operador logístico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstNames\": \"Oscar\",\n  \"lastNames\": \"Operador\",\n  \"email\": \"{{operatorEmail}}\",\n  \"document\": \"{{run}}2\",\n  \"role\": \"LOGISTIC_OPERATOR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar supervisor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstNames\": \"Sara\",\n  \"lastNames\": \"Supervisora\",\n  \"email\": \"{{supervisorEmail}}\",\n  \"document\": \"{{run}}3\",\n  \"role\": \"SUPERVISOR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Alta del vendedor con su bodega",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"sellerId\", pm.response.json().id);",
+                  "pm.collectionVariables.set(\"warehouseId\", pm.response.json().warehouses[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/sellers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "sellers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{sellerUserId}}\",\n  \"firstWarehouse\": {\n    \"name\": \"Bodega Norte {{run}}\",\n    \"type\": \"PHYSICAL\",\n    \"address\": {\n      \"street\": \"Calle 10 # 20-30\",\n      \"city\": \"Medellin\",\n      \"department\": \"Antioquia\",\n      \"postalCode\": \"050001\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar bodega del marketplace",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/warehouses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "warehouses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bodega Central {{run}}\",\n  \"type\": \"PHYSICAL\",\n  \"address\": {\n    \"street\": \"Calle 10 # 20-30\",\n    \"city\": \"Medellin\",\n    \"department\": \"Antioquia\",\n    \"postalCode\": \"050001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Vendedor",
+      "item": [
+        {
+          "name": "Registrar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"productId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{sellerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seller/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camiseta\",\n  \"description\": \"Algodón\",\n  \"type\": \"PHYSICAL\",\n  \"price\": 45000,\n  \"variants\": [\n    \"S\",\n    \"M\",\n    \"L\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Inventario inicial",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"inventoryId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{sellerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seller/inventories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller",
+                "inventories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"warehouseId\": \"{{warehouseId}}\",\n  \"quantity\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publicar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{sellerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seller/products/{{productId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller",
+                "products",
+                "{{productId}}",
+                "publish"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ajustar inventario (+5)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{sellerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seller/inventories/{{inventoryId}}/adjustment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller",
+                "inventories",
+                "{{inventoryId}}",
+                "adjustment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"difference\": 5,\n  \"reason\": \"Llegada de proveedor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis productos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{sellerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seller/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disponibilidad pública",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Hay 15 unidades\", function () { pm.expect(pm.response.json().available).to.eql(15); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/products/{{productId}}/availability",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "products",
+                "{{productId}}",
+                "availability"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Comprador",
+      "item": [
+        {
+          "name": "Agregar al carrito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "cart",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ver carrito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "cart"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirmar pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"orderId\", pm.response.json().id);",
+                  "pm.collectionVariables.set(\"orderTotal\", pm.response.json().total);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Pagar pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Queda PAID\", function () { pm.expect(pm.response.json().status).to.eql(\"PAID\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/orders/{{orderId}}/payment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "orders",
+                "{{orderId}}",
+                "payment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{orderTotal}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis pedidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "orders"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Operador logístico",
+      "item": [
+        {
+          "name": "Pedidos por despachar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{operatorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/logistics/orders/to-ship",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "logistics",
+                "orders",
+                "to-ship"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Despachar pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{operatorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/logistics/orders/{{orderId}}/ship",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "logistics",
+                "orders",
+                "{{orderId}}",
+                "ship"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirmar entrega",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Queda DELIVERED\", function () { pm.expect(pm.response.json().status).to.eql(\"DELIVERED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{operatorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/logistics/orders/{{orderId}}/deliver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "logistics",
+                "orders",
+                "{{orderId}}",
+                "deliver"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Posventa",
+      "item": [
+        {
+          "name": "Solicitar devolución (comprador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"returnId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/orders/{{orderId}}/returns",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "orders",
+                "{{orderId}}",
+                "returns"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Talla equivocada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Aprobar devolución (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"refundId\", pm.response.json().refundId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/returns/{{returnId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "returns",
+                "{{returnId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Procesar reembolso (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{adminEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/refunds/{{refundId}}/process",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "refunds",
+                "{{refundId}}",
+                "process"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reintegrar al stock (operador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{operatorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/logistics/inventories/{{inventoryId}}/restock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "logistics",
+                "inventories",
+                "{{inventoryId}}",
+                "restock"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"returnId\": \"{{returnId}}\",\n  \"units\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Supervisor",
+      "item": [
+        {
+          "name": "Usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{supervisorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/supervisor/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "supervisor",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bodegas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{supervisorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/supervisor/warehouses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "supervisor",
+                "warehouses"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inventario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{supervisorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/supervisor/inventories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "supervisor",
+                "inventories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pedidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{supervisorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/supervisor/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "supervisor",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Auditoría completa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{supervisorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/supervisor/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "supervisor",
+                "audit-logs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Auditoría del pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{supervisorEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/supervisor/audit-logs/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "supervisor",
+                "audit-logs",
+                "{{orderId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Errores esperados",
+      "item": [
+        {
+          "name": "Sin encabezado X-User-Email (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "cart"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Comprador en endpoint de admin (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "audit-logs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Id que no existe (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{sellerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seller/products/00000000-0000-0000-0000-000000000000/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller",
+                "products",
+                "00000000-0000-0000-0000-000000000000",
+                "publish"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cuerpo inválido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "cart",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Sin stock suficiente (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{buyerEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "cart",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@nexusmarket.com"
+    },
+    {
+      "key": "run",
+      "value": ""
+    },
+    {
+      "key": "sellerEmail",
+      "value": ""
+    },
+    {
+      "key": "operatorEmail",
+      "value": ""
+    },
+    {
+      "key": "supervisorEmail",
+      "value": ""
+    },
+    {
+      "key": "buyerEmail",
+      "value": ""
+    },
+    {
+      "key": "buyerUserId",
+      "value": ""
+    },
+    {
+      "key": "sellerUserId",
+      "value": ""
+    },
+    {
+      "key": "sellerId",
+      "value": ""
+    },
+    {
+      "key": "warehouseId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "inventoryId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "orderTotal",
+      "value": ""
+    },
+    {
+      "key": "returnId",
+      "value": ""
+    },
+    {
+      "key": "refundId",
+      "value": ""
+    }
+  ]
+}
