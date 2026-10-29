@@ -43,8 +43,19 @@ Las reglas del dominio y los flujos de los casos de uso están cubiertos por 237
 
 ## Cómo levantar la aplicación
 
+Todo en Docker (aplicación, MySQL y MongoDB), desde la carpeta `NexusMarket`:
+
 ```powershell
-docker compose up -d          # desde la carpeta NexusMarket: MySQL y MongoDB
-cd nexusmarket
-.\mvnw spring-boot:run        # crea las tablas, la colección y el administrador inicial
+docker compose up -d --build
+docker compose logs -f nexusmarket-app     # Ctrl + C para dejar de ver el log
 ```
+
+O solo las bases en Docker y la aplicación desde Windows:
+
+```powershell
+docker compose up -d mysql-db mongo-db
+cd nexusmarket
+.\mvnw spring-boot:run
+```
+
+En los dos casos Hibernate crea las tablas, se crea la colección de auditoría y, si no hay ningún administrador, se crea el inicial.

@@ -286,16 +286,19 @@ La auditoría sigue el mismo patrón del proyecto de referencia (`AuditLogMongoA
 
 ## 9. Configuración y bases de datos
 
-Las dos bases corren en Docker con el `docker-compose.yml` de la raíz del repositorio, igual que en el proyecto de referencia:
+La aplicación y sus dos bases corren en Docker con el `docker-compose.yml` de la raíz del repositorio, igual que en el proyecto de referencia:
 
 | Servicio | Imagen | Puerto en el computador | Base |
 |---|---|---|---|
 | `mysql-db` (`nexusmarket-mysql`) | `mysql:8.0` | 3307 | `nexusmarket_db`, usuario `nexus_app` |
 | `mongo-db` (`nexusmarket-mongo`) | `mongo:6.0` | 27018 | `nexusmarket_audit` |
+| `nexusmarket-app` | se construye con `nexusmarket/Dockerfile` | 8080 | se conecta a `mysql-db` y `mongo-db` por la red interna de Docker |
+
+El `Dockerfile` parte de la imagen `maven:3.9-eclipse-temurin-17`, copia `pom.xml` y `src` y arranca con `mvn spring-boot:run`, igual que el del profesor. El contenedor de la aplicación solo arranca cuando las dos bases responden (`depends_on` con `service_healthy`), y las dependencias de Maven se guardan en el volumen `maven_cache` para no descargarlas cada vez.
 
 Los puertos 3307 y 27018 evitan choques con un MySQL o un MongoDB instalados en Windows, que usan 3306 y 27017.
 
-`application.properties` apunta a esos contenedores por defecto. Cada valor se puede cambiar con una variable de entorno sin tocar el archivo: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y `MONGODB_URI`.
+`application.properties` apunta por defecto a los puertos 3307 y 27018, para correr la aplicación desde Windows con `mvnw`. Dentro de Docker, `docker-compose.yml` le pasa `DB_URL` y `MONGODB_URI` con los nombres internos de los contenedores. Cada valor se puede cambiar con una variable de entorno sin tocar el archivo: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y `MONGODB_URI`.
 
 * `spring.jpa.hibernate.ddl-auto=update`: Hibernate crea las tablas la primera vez y agrega columnas nuevas después, sin borrar datos.
 * `spring.jpa.open-in-view=false`: la conexión a MySQL se usa solo dentro de los casos de uso.

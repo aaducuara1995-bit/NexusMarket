@@ -1,6 +1,7 @@
-# Databases for NexusMarket, following the reference project.
-# Start them with:  docker compose up -d     (from the NexusMarket folder)
-# Stop them with:   docker compose down      (the data stays in the volumes)
+# NexusMarket with its two databases, following the reference project.
+# Everything:        docker compose up -d --build      (from the NexusMarket folder)
+# Only databases:    docker compose up -d mysql-db mongo-db   (then run .\mvnw spring-boot:run)
+# Stop:              docker compose down               (the data stays in the volumes)
 # Host ports 3307 and 27018 avoid clashing with a MySQL or MongoDB installed on Windows.
 services:
   mysql-db:
@@ -36,6 +37,29 @@ services:
       timeout: 5s
       retries: 20
 
+  nexusmarket-app:
+    build:
+      context: ./nexusmarket
+      dockerfile: Dockerfile
+    container_name: nexusmarket-app
+    working_dir: /workspace
+    volumes:
+      - ./nexusmarket:/workspace
+      - maven_cache:/root/.m2
+    ports:
+      - "${HOST_SERVER_PORT:-8080}:8080"
+    environment:
+      DB_URL: "jdbc:mysql://mysql-db:3306/nexusmarket_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      DB_USERNAME: nexus_app
+      DB_PASSWORD: ${MYSQL_PASSWORD:-nexus_app_password}
+      MONGODB_URI: mongodb://mongo-db:27017/nexusmarket_audit
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      mongo-db:
+        condition: service_healthy
+
 volumes:
   mysql_data:
   mongo_data:
+  maven_cache:
