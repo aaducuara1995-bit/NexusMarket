@@ -298,7 +298,7 @@ El `Dockerfile` parte de la imagen `maven:3.9-eclipse-temurin-17`, copia `pom.xm
 
 Los puertos 3307 y 27018 evitan choques con un MySQL o un MongoDB instalados en Windows, que usan 3306 y 27017.
 
-`application.properties` apunta por defecto a los puertos 3307 y 27018, para correr la aplicación desde Windows con `mvnw`. Dentro de Docker, `docker-compose.yml` le pasa `DB_URL` y `MONGODB_URI` con los nombres internos de los contenedores. Cada valor se puede cambiar con una variable de entorno sin tocar el archivo: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y `MONGODB_URI`.
+`application.properties` apunta por defecto a los puertos 3307 y 27018, para correr la aplicación desde Windows con `mvnw`. Dentro de Docker, `docker-compose.yml` le pasa `DB_URL` y `MONGODB_URI` con los nombres internos de los contenedores, más `SERVER_PORT`, `JWT_SECRET`, `JWT_EXPIRATION_MS` y `FRONTEND_ORIGIN`, igual que el proyecto de referencia. Las tres últimas las usa la seguridad de la Fase D. El servicio declara el arranque con `command: ["mvn", "-B", "spring-boot:run"]`. Cada valor se puede cambiar con una variable de entorno sin tocar el archivo: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y `MONGODB_URI`.
 
 * `spring.jpa.hibernate.ddl-auto=update`: Hibernate crea las tablas la primera vez y agrega columnas nuevas después, sin borrar datos.
 * `spring.jpa.open-in-view=false`: la conexión a MySQL se usa solo dentro de los casos de uso.
