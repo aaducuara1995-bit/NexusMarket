@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 /**
  * JPA persistence entity (repository DTO) for User, stored in MySQL table users.
- * User account. One role per user (RG-02); email and document are unique.
+ * User account. One role per user (RG-02); email and document are unique. The password is stored only as a BCrypt hash.
  * References to other aggregates are kept as identifiers; the adapter rebuilds them.
  */
 @Entity
@@ -42,6 +42,9 @@ public class UserJpaEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 30, nullable = false)
     private UserStatus status;
+
+    @Column(name = "password_hash", length = 100)
+    private String passwordHash;
 
     public UserJpaEntity() {
     }
@@ -100,5 +103,13 @@ public class UserJpaEntity {
 
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 }

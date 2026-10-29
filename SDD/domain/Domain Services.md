@@ -4,7 +4,7 @@
 
 Los servicios de dominio contienen las reglas de negocio que no caben en una sola entidad, por ejemplo repartir la reserva de un pedido entre varias bodegas o despachar un pedido actualizando a la vez el envío, el pedido y el inventario. No dependen de bases de datos, frameworks ni HTTP: reciben entidades del dominio y, cuando necesitan información externa, usan un puerto de salida.
 
-Hay 34 servicios en `domain/services/`, organizados por subdominio. El detalle de cada uno (operaciones, dependencias, rol que lo ejecuta y reglas) está en la carpeta `services/`.
+Hay 35 servicios en `domain/services/`, organizados por subdominio. El detalle de cada uno (operaciones, dependencias, rol que lo ejecuta y reglas) está en la carpeta `services/`.
 
 Las operaciones que modifican varias entidades validan todo antes de cambiar algo, y las que reservan stock son de todo o nada: si algo falla a mitad de camino, se deshace lo que ya se había hecho.
 
@@ -40,6 +40,10 @@ Registro de usuarios y de sus perfiles, incorporación de vendedores y administr
 
 Detalle: `services/user-services.md`
 
+## LoginService
+
+Autentica a un usuario con su correo y contraseña y le entrega el token de acceso.
+
 ## OnboardSellerService
 
 Incorpora a un vendedor junto con su primera bodega, como describe el flujo 6.1.
@@ -54,7 +58,7 @@ Crea el perfil de vendedor de un usuario.
 
 ## RegisterUserService
 
-Registra un usuario nuevo.
+Registra un usuario nuevo con su contraseña.
 
 ## RegisterWarehouseService
 

@@ -1,6 +1,7 @@
 package application.adapters.rest;
 
 import application.adapters.rest.controllers.AdminRestController;
+import application.adapters.rest.controllers.AuthRestController;
 import application.adapters.rest.controllers.BuyerRestController;
 import application.adapters.rest.controllers.LogisticOperatorRestController;
 import application.adapters.rest.controllers.PublicAccessRestController;
@@ -24,7 +25,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The REST controllers wired to the real use cases and in-memory repositories, so the
- * tests call each endpoint method as plain Java and check status codes and bodies.
+ * tests call each endpoint method as plain Java and check status codes and bodies. The
+ * signed-in user is passed as the controllers receive it from the JWT.
  */
 public final class RestTestContext {
 
@@ -51,30 +53,38 @@ public final class RestTestContext {
     public final AdminUseCaseImpl adminUseCase;
     public final SupervisorUseCaseImpl supervisorUseCase;
 
-    public final AuthenticatedUserResolver currentUser = new AuthenticatedUserResolver(users);
     public final RestReferenceLoader loader = new RestReferenceLoader(users, sellers, warehouses, products,
             inventories, orders, returns, refunds);
     public final GlobalExceptionHandler errors = new GlobalExceptionHandler();
 
     public final PublicAccessRestController publicController;
+    public final AuthRestController authController;
     public final AdminRestController adminController;
     public final SupervisorRestController supervisorController;
     public final SellerRestController sellerController;
     public final LogisticOperatorRestController logisticController;
     public final BuyerRestController buyerController;
 
+    public static final String ADMIN_PASSWORD = "Admin12345*";
+    public static final String PASSWORD = "secret123";
+
     public final User admin;
+
+    /** The User that the JWT would carry for this email (what @AuthenticationPrincipal injects). */
+    public User user(String email) {
+        return users.findByEmail(new Email(email)).orElseThrow();
+    }
 
     public RestTestContext() {
         AuthorizationService authorization = new AuthorizationService();
         BuyerValidationService buyerValidation = new BuyerValidationService();
         SellerValidationService sellerValidation = new SellerValidationService();
         InventoryAccessService inventoryAccess = new InventoryAccessService(authorization, sellerValidation);
-        RegisterUserService registerUser = new RegisterUserService(authorization, users);
+        RegisterUserService registerUser = new RegisterUserService(authorization, users, new InMemoryRepositories.FakePasswords());
         RegisterAuditLogService audit = new RegisterAuditLogService(auditLogs);
         ConsultAuditLogService consultAudit = new ConsultAuditLogService(authorization, auditLogs);
 
-        publicAccess = new PublicAccessUseCaseImpl(registerUser, new RegisterBuyerService(buyers),
+        publicAccess = new PublicAccessUseCaseImpl(new LoginService(users, new InMemoryRepositories.FakePasswords(), new InMemoryRepositories.FakeTokens()), registerUser, new RegisterBuyerService(buyers),
                 new CheckAvailabilityService(), products, inventories, audit);
         buyerUseCase = new BuyerUseCaseImpl(authorization, new AddToCartService(buyerValidation),
                 new ConfirmOrderService(buyerValidation, new ReserveInventoryService(), new ReleaseReservationService()),
@@ -104,14 +114,16 @@ public final class RestTestContext {
         supervisorUseCase = new SupervisorUseCaseImpl(authorization, users, warehouses, inventories, orders, consultAudit);
 
         publicController = new PublicAccessRestController(publicAccess, loader);
-        adminController = new AdminRestController(adminUseCase, currentUser, loader);
-        supervisorController = new SupervisorRestController(supervisorUseCase, currentUser);
-        sellerController = new SellerRestController(sellerUseCase, currentUser, loader);
-        logisticController = new LogisticOperatorRestController(logisticUseCase, currentUser, loader);
-        buyerController = new BuyerRestController(buyerUseCase, currentUser, loader);
+        authController = new AuthRestController(publicAccess, 3_600_000L);
+        adminController = new AdminRestController(adminUseCase, loader);
+        supervisorController = new SupervisorRestController(supervisorUseCase);
+        sellerController = new SellerRestController(sellerUseCase, loader);
+        logisticController = new LogisticOperatorRestController(logisticUseCase, loader);
+        buyerController = new BuyerRestController(buyerUseCase, loader);
 
         admin = new User(new FullName("Administrador", "NexusMarket"), new Email("admin@nexusmarket.com"),
                 new IdentityDocument("1000000000"), UserRole.ADMIN);
+        admin.assignPasswordHash("hash:" + ADMIN_PASSWORD);
         users.save(admin);
     }
 

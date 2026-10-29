@@ -13,6 +13,7 @@ En el código se implementan como `record` de Java en `domain/valueobjects/`. Lo
 ```text
 valueobjects
 ├── Address
+├── AuthenticationResult
 ├── Email
 ├── FullName
 ├── IdentityDocument
@@ -61,6 +62,26 @@ Ubicación física: direcciones del comprador, bodegas físicas y destino de los
 ## Reglas
 
 * Todos los campos son obligatorios.
+
+---
+
+# AuthenticationResult
+
+## Descripción
+
+Resultado de un inicio de sesión correcto.
+
+## Atributos
+
+| Atributo | Tipo | Descripción |
+|---|---|---|
+| `user` | `User` | Usuario autenticado. |
+| `token` | `String` | Token de acceso que lo identifica en las siguientes peticiones (JWT). |
+
+## Reglas
+
+* Ambos campos son obligatorios.
+* Lo produce `LoginService`; el dominio no conoce el formato del token.
 
 ---
 

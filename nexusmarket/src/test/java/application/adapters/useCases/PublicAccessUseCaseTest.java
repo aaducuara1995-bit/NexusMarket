@@ -17,7 +17,7 @@ class PublicAccessUseCaseTest {
         UseCaseTestContext ctx = new UseCaseTestContext();
 
         Buyer buyer = ctx.publicAccess.registerBuyer(ctx.newUser(UserRole.BUYER),
-                UseCaseTestContext.address("Calle 5"));
+                UseCaseTestContext.address("Calle 5"), "secret123");
 
         assertEquals(1, ctx.users.saved.size());
         assertTrue(ctx.buyers.findByUserId(buyer.getUserId()).isPresent());
@@ -29,7 +29,7 @@ class PublicAccessUseCaseTest {
         User seller = ctx.newUser(UserRole.SELLER);
 
         assertThrows(AccessDeniedException.class,
-                () -> ctx.publicAccess.registerBuyer(seller, UseCaseTestContext.address("Calle 5")));
+                () -> ctx.publicAccess.registerBuyer(seller, UseCaseTestContext.address("Calle 5"), "secret123"));
         assertTrue(ctx.users.saved.isEmpty());
     }
 

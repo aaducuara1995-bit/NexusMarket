@@ -68,11 +68,11 @@ final class JpaTestContext {
         BuyerValidationService buyerValidation = new BuyerValidationService();
         SellerValidationService sellerValidation = new SellerValidationService();
         InventoryAccessService inventoryAccess = new InventoryAccessService(authorization, sellerValidation);
-        RegisterUserService registerUser = new RegisterUserService(authorization, users);
+        RegisterUserService registerUser = new RegisterUserService(authorization, users, new InMemoryRepositories.FakePasswords());
         RegisterAuditLogService audit = new RegisterAuditLogService(auditLogs);
         ConsultAuditLogService consultAudit = new ConsultAuditLogService(authorization, auditLogs);
 
-        publicAccess = new PublicAccessUseCaseImpl(registerUser, new RegisterBuyerService(buyers),
+        publicAccess = new PublicAccessUseCaseImpl(new LoginService(users, new InMemoryRepositories.FakePasswords(), new InMemoryRepositories.FakeTokens()), registerUser, new RegisterBuyerService(buyers),
                 new CheckAvailabilityService(), products, inventories, audit);
         buyerUseCase = new BuyerUseCaseImpl(authorization, new AddToCartService(buyerValidation),
                 new ConfirmOrderService(buyerValidation, new ReserveInventoryService(), new ReleaseReservationService()),

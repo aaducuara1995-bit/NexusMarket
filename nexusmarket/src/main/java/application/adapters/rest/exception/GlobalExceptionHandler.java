@@ -3,6 +3,7 @@ package application.adapters.rest.exception;
 import application.adapters.rest.dtos.responses.ErrorResponseDTO;
 import application.domain.exceptions.AccessDeniedException;
 import application.domain.exceptions.EntityNotFoundException;
+import application.domain.exceptions.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -23,15 +23,18 @@ import java.util.stream.Collectors;
 /**
  * Translates exceptions into HTTP answers with the same body (ErrorResponseDTO).
  * The domain throws plain Java exceptions; this is the only place that knows HTTP:
- * not found 404, not allowed 403, invalid data 400, business rule rejected 409.
+ * wrong credentials 401, not found 404, not allowed 403, invalid data 400, business rule
+ * rejected 409. Requests without a valid token never get here: SecurityErrorHandler
+ * answers them with the same body.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(UnauthenticatedException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUnauthenticated(UnauthenticatedException ex, HttpServletRequest request) {
+    /** Wrong email or password at login. */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidCredentials(InvalidCredentialsException ex, HttpServletRequest request) {
         return body(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
@@ -74,12 +77,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadParameter(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         return body(HttpStatus.BAD_REQUEST, "The parameter '" + ex.getName() + "' has an invalid format.", request);
-    }
-
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<ErrorResponseDTO> handleMissingHeader(MissingRequestHeaderException ex, HttpServletRequest request) {
-        return body(HttpStatus.UNAUTHORIZED,
-                "The " + ex.getHeaderName() + " header is required to identify the user.", request);
     }
 
     /** A URL that no controller answers (a typo in the path, for example). */

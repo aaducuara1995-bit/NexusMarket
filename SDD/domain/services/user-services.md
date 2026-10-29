@@ -4,6 +4,31 @@ Registro de usuarios y de sus perfiles, incorporación de vendedores y administr
 
 ---
 
+## LoginService
+
+**Propósito:** Autentica a un usuario con su correo y contraseña y le entrega el token de acceso.
+
+**Quién lo ejecuta:** Cualquier usuario registrado (acceso público).
+
+**Lo usa:** `PublicAccessUseCaseImpl`
+
+**Dependencias:** `UserRepositoryPort users`, `PasswordServicePort passwords`, `TokenServicePort tokens`
+
+**Operaciones:**
+
+```java
+AuthenticationResult login(Email email, String rawPassword);
+```
+
+**Reglas de negocio:**
+
+* Si el correo no existe, el usuario no tiene contraseña o la contraseña no coincide, responde `InvalidCredentialsException` con el mismo mensaje, para no revelar qué correos están registrados.
+* Compara la contraseña por medio de `PasswordServicePort` (BCrypt).
+* Un usuario bloqueado no puede iniciar sesión.
+* El token lo genera `TokenServicePort` (JWT).
+
+---
+
 ## OnboardSellerService
 
 **Propósito:** Incorpora a un vendedor junto con su primera bodega, como describe el flujo 6.1.
@@ -78,22 +103,23 @@ Seller register(User admin, User sellerUser);
 
 ## RegisterUserService
 
-**Propósito:** Registra un usuario nuevo.
+**Propósito:** Registra un usuario nuevo con su contraseña.
 
 **Quién lo ejecuta:** Comprador (registro propio) o administrador.
 
 **Lo usa:** `AdminUseCaseImpl`, `PublicAccessUseCaseImpl`
 
-**Dependencias:** `AuthorizationService authorization`, `UserRepositoryPort users`
+**Dependencias:** `AuthorizationService authorization`, `UserRepositoryPort users`, `PasswordServicePort passwords`
 
 **Operaciones:**
 
 ```java
-User register(User actor, FullName name, Email email, IdentityDocument document, UserRole role);
+User register(User actor, FullName name, Email email, IdentityDocument document, UserRole role, String rawPassword);
 ```
 
 **Reglas de negocio:**
 
+* La contraseña tiene al menos 8 caracteres y se guarda cifrada (`PasswordServicePort`).
 * El correo y el documento deben ser únicos; se consultan en `UserRepositoryPort`.
 * Un comprador puede registrarse solo.
 * Un vendedor no se registra solo: lo registra un administrador.

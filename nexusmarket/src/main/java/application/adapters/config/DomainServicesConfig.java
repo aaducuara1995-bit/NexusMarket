@@ -2,8 +2,10 @@ package application.adapters.config;
 
 import application.domain.ports.out.AuditLogRepositoryPort;
 import application.domain.ports.out.BuyerRepositoryPort;
+import application.domain.ports.out.PasswordServicePort;
 import application.domain.ports.out.ProductRepositoryPort;
 import application.domain.ports.out.SellerRepositoryPort;
+import application.domain.ports.out.TokenServicePort;
 import application.domain.ports.out.UserRepositoryPort;
 import application.domain.ports.out.WarehouseRepositoryPort;
 import application.domain.services.AddToCartService;
@@ -21,6 +23,7 @@ import application.domain.services.GenerateRefundService;
 import application.domain.services.InventoryAccessService;
 import application.domain.services.InventoryOutflowService;
 import application.domain.services.IssueInvoiceService;
+import application.domain.services.LoginService;
 import application.domain.services.MarkInventoryService;
 import application.domain.services.OnboardSellerService;
 import application.domain.services.PayOrderService;
@@ -178,8 +181,13 @@ public class DomainServicesConfig {
     }
 
     @Bean
-    public RegisterUserService registerUserService(AuthorizationService authorizationService, UserRepositoryPort userRepositoryPort) {
-        return new RegisterUserService(authorizationService, userRepositoryPort);
+    public RegisterUserService registerUserService(AuthorizationService authorizationService, UserRepositoryPort userRepositoryPort, PasswordServicePort passwordServicePort) {
+        return new RegisterUserService(authorizationService, userRepositoryPort, passwordServicePort);
+    }
+
+    @Bean
+    public LoginService loginService(UserRepositoryPort userRepositoryPort, PasswordServicePort passwordServicePort, TokenServicePort tokenServicePort) {
+        return new LoginService(userRepositoryPort, passwordServicePort, tokenServicePort);
     }
 
     @Bean

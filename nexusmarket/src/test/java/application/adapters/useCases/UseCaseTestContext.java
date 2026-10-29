@@ -56,11 +56,11 @@ final class UseCaseTestContext {
         BuyerValidationService buyerValidation = new BuyerValidationService();
         SellerValidationService sellerValidation = new SellerValidationService();
         InventoryAccessService inventoryAccess = new InventoryAccessService(authorization, sellerValidation);
-        RegisterUserService registerUser = new RegisterUserService(authorization, users);
+        RegisterUserService registerUser = new RegisterUserService(authorization, users, new InMemoryRepositories.FakePasswords());
         RegisterAuditLogService audit = new RegisterAuditLogService(auditLogs);
         ConsultAuditLogService consultAudit = new ConsultAuditLogService(authorization, auditLogs);
 
-        publicAccess = new PublicAccessUseCaseImpl(registerUser, new RegisterBuyerService(buyers),
+        publicAccess = new PublicAccessUseCaseImpl(new LoginService(users, new InMemoryRepositories.FakePasswords(), new InMemoryRepositories.FakeTokens()), registerUser, new RegisterBuyerService(buyers),
                 new CheckAvailabilityService(), products, inventories, audit);
 
         buyerUseCase = new BuyerUseCaseImpl(authorization,
@@ -131,7 +131,7 @@ final class UseCaseTestContext {
     }
 
     User registered(User admin, UserRole role) {
-        return adminUseCase.registerUser(admin, newUser(role));
+        return adminUseCase.registerUser(admin, newUser(role), "secret123");
     }
 
     /** A seller user with their profile and a first warehouse. */
@@ -164,7 +164,7 @@ final class UseCaseTestContext {
 
     User buyerUser() {
         User user = newUser(UserRole.BUYER);
-        Buyer buyer = publicAccess.registerBuyer(user, address("Calle 10 # 20-30"));
+        Buyer buyer = publicAccess.registerBuyer(user, address("Calle 10 # 20-30"), "secret123");
         return users.findById(buyer.getUserId()).orElseThrow();
     }
 

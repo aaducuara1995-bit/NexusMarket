@@ -4,24 +4,35 @@
 
 Estos son todos los endpoints de NexusMarket. Cada controlador atiende un solo rol y llama solo a su puerto de entrada, igual que en el proyecto de referencia. La tabla se genera desde el código de `adapters/rest/controllers/`.
 
-Hay 46 endpoints en 6 controladores.
+Hay 47 endpoints en 7 controladores: el de login y uno por rol.
 
 * **Base:** `http://localhost:8080`
-* **Usuario que hace la petición (Fase C):** encabezado `X-User-Email` con el correo de un usuario registrado. Al arrancar existe `admin@nexusmarket.com`. En la Fase D este encabezado se reemplaza por el token JWT (`Authorization: Bearer ...`).
+* **Autenticación (JWT):** primero `POST /api/v1/auth/login` con correo y contraseña. El token que devuelve va en todas las demás peticiones como `Authorization: Bearer <token>`. Al arrancar existe `admin@nexusmarket.com` con la contraseña `Admin12345*` (se cambia con `ADMIN_PASSWORD`).
+* **Permisos por ruta:** cada ruta base solo acepta tokens de su rol (ver `Rest-security.md`). Sin token o con un token inválido la respuesta es 401; con el rol equivocado, 403.
 * **Formato:** JSON. Los ids son UUID. Los montos van en pesos colombianos (COP) si no se indica otra moneda.
 * **Errores:** siempre con el mismo cuerpo, ver `Global-exception-handler.md`.
 
 ---
 
-## PublicAccessRestController
+## AuthRestController
 
-**Ruta base:** `/api/v1/public`  
-**Rol:** Público, sin encabezado  
+**Ruta base:** `/api/v1/auth`  
+**Rol:** Público, sin token  
 **Puerto de entrada:** `PublicAccessPort`
 
 | Método | Ruta | Cuerpo | Respuesta | Qué hace |
 |---|---|---|---|---|
-| `POST` | `/api/v1/public/buyers` | `RegisterBuyerRequestDTO` | 201 `BuyerResponseDTO` | Registra un comprador nuevo (usuario con rol BUYER y su dirección principal). |
+| `POST` | `/api/v1/auth/login` | `LoginRequestDTO` | 200 `LoginResponseDTO` | Inicia sesión con correo y contraseña y devuelve el token JWT. |
+
+## PublicAccessRestController
+
+**Ruta base:** `/api/v1/public`  
+**Rol:** Público, sin token  
+**Puerto de entrada:** `PublicAccessPort`
+
+| Método | Ruta | Cuerpo | Respuesta | Qué hace |
+|---|---|---|---|---|
+| `POST` | `/api/v1/public/buyers` | `RegisterBuyerRequestDTO` | 201 `BuyerResponseDTO` | Registra un comprador nuevo (usuario con rol BUYER, contraseña y dirección principal). |
 | `GET` | `/api/v1/public/products` | — | 200 `lista de ProductResponseDTO` | Lista los productos publicados. |
 | `GET` | `/api/v1/public/products/{productId}/availability` | — | 200 `AvailabilityResponseDTO` | Unidades disponibles de un producto, sumando todas las bodegas. |
 
@@ -87,7 +98,7 @@ Hay 46 endpoints en 6 controladores.
 
 | Método | Ruta | Cuerpo | Respuesta | Qué hace |
 |---|---|---|---|---|
-| `POST` | `/api/v1/admin/users` | `RegisterUserRequestDTO` | 201 `UserResponseDTO` | Registra un usuario con cualquier rol. |
+| `POST` | `/api/v1/admin/users` | `RegisterUserRequestDTO` | 201 `UserResponseDTO` | Registra un usuario con cualquier rol y su contraseña inicial. |
 | `PATCH` | `/api/v1/admin/users/{userId}/block` | — | 200 `UserResponseDTO` | Bloquea un usuario. Un administrador no se puede bloquear a sí mismo. |
 | `PATCH` | `/api/v1/admin/users/{userId}/activate` | — | 200 `UserResponseDTO` | Reactiva un usuario bloqueado. |
 | `POST` | `/api/v1/admin/sellers` | `OnboardSellerRequestDTO` | 201 `SellerResponseDTO` | Da de alta un vendedor con su primera bodega (RN-01). |
@@ -147,6 +158,13 @@ Los campos con anotaciones de `jakarta.validation` se revisan antes de llegar al
 | `warehouseId` | `UUID` | `@NotNull` |
 | `quantity` | `Integer` | `@NotNull`, `@PositiveOrZero` |
 
+### LoginRequestDTO
+
+| Campo | Tipo | Validación |
+|---|---|---|
+| `email` | `String` | `@NotBlank`, `@Email` |
+| `password` | `String` | `@NotBlank` |
+
 ### OnboardSellerRequestDTO
 
 | Campo | Tipo | Validación |
@@ -180,6 +198,7 @@ Los campos con anotaciones de `jakarta.validation` se revisan antes de llegar al
 | `lastNames` | `String` | `@NotBlank` |
 | `email` | `String` | `@NotBlank`, `@Email` |
 | `document` | `String` | `@NotBlank`, `@Pattern(regexp = "\\d+", message = "must contain only digits")` |
+| `password` | `String` | `@NotBlank`, `@Size(min = 8, message = "must have at least 8 characters")` |
 | `mainAddress` | `AddressDTO` | `@NotNull`, `@Valid` |
 
 ### RegisterUserRequestDTO
@@ -190,6 +209,7 @@ Los campos con anotaciones de `jakarta.validation` se revisan antes de llegar al
 | `lastNames` | `String` | `@NotBlank` |
 | `email` | `String` | `@NotBlank`, `@Email` |
 | `document` | `String` | `@NotBlank`, `@Pattern(regexp = "\\d+", message = "must contain only digits")` |
+| `password` | `String` | `@NotBlank`, `@Size(min = 8, message = "must have at least 8 characters")` |
 | `role` | `UserRole` | `@NotNull` |
 
 ### RestockRequestDTO
@@ -227,12 +247,15 @@ Los campos con anotaciones de `jakarta.validation` se revisan antes de llegar al
 ## Ejemplo: una compra completa
 
 ```text
-1. POST  /api/v1/admin/users                 (X-User-Email: admin)   crea el usuario SELLER
+0. POST  /api/v1/auth/login                  (sin token)             el admin obtiene su token
+1. POST  /api/v1/admin/users                 (token del admin)       crea el usuario SELLER con su contraseña
 2. POST  /api/v1/admin/sellers               (admin)                 alta del vendedor + bodega
+   POST  /api/v1/auth/login                  (sin token)             el vendedor obtiene su token
 3. POST  /api/v1/seller/products             (vendedor)              registra el producto
 4. POST  /api/v1/seller/inventories          (vendedor)              stock inicial en su bodega
 5. PATCH /api/v1/seller/products/{id}/publish (vendedor)             lo publica
-6. POST  /api/v1/public/buyers               (sin encabezado)        se registra el comprador
+6. POST  /api/v1/public/buyers               (sin token)             se registra el comprador
+   POST  /api/v1/auth/login                  (sin token)             el comprador obtiene su token
 7. POST  /api/v1/buyer/cart/items            (comprador)             agrega al carrito
 8. POST  /api/v1/buyer/orders                (comprador)             confirma: pedido PENDING_PAYMENT
 9. POST  /api/v1/buyer/orders/{id}/payment   (comprador)             paga: factura + envío

@@ -80,12 +80,12 @@ public class AdminUseCaseImpl implements AdminPort {
     }
 
     @Override
-    public User registerUser(User admin, User newUser) {
+    public User registerUser(User admin, User newUser, String password) {
         authorizationService.requirePermission(admin, BusinessProcess.USER_MANAGEMENT);
         if (newUser == null)
             throw new IllegalArgumentException("The user to register is required.");
         User registered = registerUserService.register(admin, newUser.getFullName(), newUser.getEmail(),
-                newUser.getDocument(), newUser.getRole());
+                newUser.getDocument(), newUser.getRole(), password);
         auditLogService.register(AuditOperation.USER_REGISTRATION, admin, registered.getId(),
                 Map.of("role", registered.getRole().name()));
         return registered;

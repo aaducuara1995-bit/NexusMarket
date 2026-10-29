@@ -12,7 +12,7 @@ import java.util.List;
 /** Operations of the ADMIN role: users, sellers, warehouses and after-sales decisions. */
 public interface AdminPort {
 
-    User registerUser(User admin, User newUser);
+    User registerUser(User admin, User newUser, String password);
 
     User blockUser(User admin, User target);
 

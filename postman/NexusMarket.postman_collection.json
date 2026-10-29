@@ -2,12 +2,12 @@
   "info": {
     "_postman_id": "00000000-004e-6578-7573-4d61726b6574",
     "name": "NexusMarket API",
-    "description": "Flujo completo de NexusMarket (Fase C). Ejecutar en orden con el Runner de Postman. Cada petición guarda los ids que necesita la siguiente.",
+    "description": "Flujo completo de NexusMarket con JWT. Ejecutar en orden con el Runner de Postman: cada login guarda el token de su rol y cada petición guarda los ids que necesita la siguiente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "0. Preparación y público",
+      "name": "0. Preparación, login del admin y público",
       "item": [
         {
           "name": "Preparar datos de esta corrida",
@@ -55,7 +55,52 @@
           }
         },
         {
-          "name": "Registrar comprador",
+          "name": "Login del administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"adminToken\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar comprador (público)",
           "event": [
             {
               "listen": "test",
@@ -90,7 +135,52 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstNames\": \"Carla\",\n  \"lastNames\": \"Compradora\",\n  \"email\": \"{{buyerEmail}}\",\n  \"document\": \"{{run}}4\",\n  \"mainAddress\": {\n    \"street\": \"Calle 10 # 20-30\",\n    \"city\": \"Medellin\",\n    \"department\": \"Antioquia\",\n    \"postalCode\": \"050001\"\n  }\n}",
+              "raw": "{\n  \"firstNames\": \"Carla\",\n  \"lastNames\": \"Compradora\",\n  \"email\": \"{{buyerEmail}}\",\n  \"document\": \"{{run}}4\",\n  \"password\": \"{{userPassword}}\",\n  \"mainAddress\": {\n    \"street\": \"Calle 10 # 20-30\",\n    \"city\": \"Medellin\",\n    \"department\": \"Antioquia\",\n    \"postalCode\": \"050001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login del comprador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"buyerToken\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{buyerEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -126,8 +216,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -144,7 +234,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstNames\": \"Vera\",\n  \"lastNames\": \"Vendedora\",\n  \"email\": \"{{sellerEmail}}\",\n  \"document\": \"{{run}}1\",\n  \"role\": \"SELLER\"\n}",
+              "raw": "{\n  \"firstNames\": \"Vera\",\n  \"lastNames\": \"Vendedora\",\n  \"email\": \"{{sellerEmail}}\",\n  \"document\": \"{{run}}1\",\n  \"password\": \"{{userPassword}}\",\n  \"role\": \"SELLER\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -174,8 +264,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -192,7 +282,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstNames\": \"Oscar\",\n  \"lastNames\": \"Operador\",\n  \"email\": \"{{operatorEmail}}\",\n  \"document\": \"{{run}}2\",\n  \"role\": \"LOGISTIC_OPERATOR\"\n}",
+              "raw": "{\n  \"firstNames\": \"Oscar\",\n  \"lastNames\": \"Operador\",\n  \"email\": \"{{operatorEmail}}\",\n  \"document\": \"{{run}}2\",\n  \"password\": \"{{userPassword}}\",\n  \"role\": \"LOGISTIC_OPERATOR\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -222,8 +312,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -240,7 +330,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstNames\": \"Sara\",\n  \"lastNames\": \"Supervisora\",\n  \"email\": \"{{supervisorEmail}}\",\n  \"document\": \"{{run}}3\",\n  \"role\": \"SUPERVISOR\"\n}",
+              "raw": "{\n  \"firstNames\": \"Sara\",\n  \"lastNames\": \"Supervisora\",\n  \"email\": \"{{supervisorEmail}}\",\n  \"document\": \"{{run}}3\",\n  \"password\": \"{{userPassword}}\",\n  \"role\": \"SUPERVISOR\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -272,8 +362,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -320,8 +410,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -339,6 +429,141 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Bodega Central {{run}}\",\n  \"type\": \"PHYSICAL\",\n  \"address\": {\n    \"street\": \"Calle 10 # 20-30\",\n    \"city\": \"Medellin\",\n    \"department\": \"Antioquia\",\n    \"postalCode\": \"050001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login del vendedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"sellerToken\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{sellerEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login del operador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"operatorToken\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{operatorEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login del supervisor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"supervisorToken\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{supervisorEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -374,8 +599,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{sellerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
               }
             ],
             "url": {
@@ -423,8 +648,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{sellerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
               }
             ],
             "url": {
@@ -467,8 +692,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{sellerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
               }
             ],
             "url": {
@@ -508,8 +733,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{sellerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
               }
             ],
             "url": {
@@ -554,8 +779,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{sellerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
               }
             ],
             "url": {
@@ -631,8 +856,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -676,8 +901,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -717,8 +942,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -766,8 +991,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -812,8 +1037,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -852,8 +1077,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{operatorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{operatorToken}}"
               }
             ],
             "url": {
@@ -888,8 +1113,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{operatorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{operatorToken}}"
               }
             ],
             "url": {
@@ -926,8 +1151,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{operatorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{operatorToken}}"
               }
             ],
             "url": {
@@ -973,8 +1198,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -1020,8 +1245,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -1057,8 +1282,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{adminEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "url": {
@@ -1098,8 +1323,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{operatorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{operatorToken}}"
               }
             ],
             "url": {
@@ -1149,8 +1374,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{supervisorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{supervisorToken}}"
               }
             ],
             "url": {
@@ -1184,8 +1409,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{supervisorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{supervisorToken}}"
               }
             ],
             "url": {
@@ -1219,8 +1444,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{supervisorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{supervisorToken}}"
               }
             ],
             "url": {
@@ -1254,8 +1479,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{supervisorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{supervisorToken}}"
               }
             ],
             "url": {
@@ -1289,8 +1514,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{supervisorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{supervisorToken}}"
               }
             ],
             "url": {
@@ -1324,8 +1549,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{supervisorEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{supervisorToken}}"
               }
             ],
             "url": {
@@ -1349,7 +1574,7 @@
       "name": "7. Errores esperados",
       "item": [
         {
-          "name": "Sin encabezado X-User-Email (401)",
+          "name": "Sin token (401)",
           "event": [
             {
               "listen": "test",
@@ -1379,7 +1604,51 @@
           }
         },
         {
-          "name": "Comprador en endpoint de admin (403)",
+          "name": "Contraseña equivocada (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"clave-equivocada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Comprador en ruta de admin (403)",
           "event": [
             {
               "listen": "test",
@@ -1395,8 +1664,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -1409,6 +1678,41 @@
                 "v1",
                 "admin",
                 "audit-logs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Vendedor en ruta de comprador (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/buyer/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyer",
+                "cart"
               ]
             }
           }
@@ -1430,8 +1734,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-User-Email",
-                "value": "{{sellerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
               }
             ],
             "url": {
@@ -1471,8 +1775,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -1520,8 +1824,8 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Email",
-                "value": "{{buyerEmail}}"
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
               }
             ],
             "url": {
@@ -1561,6 +1865,14 @@
       "value": "admin@nexusmarket.com"
     },
     {
+      "key": "adminPassword",
+      "value": "Admin12345*"
+    },
+    {
+      "key": "userPassword",
+      "value": "Clave12345*"
+    },
+    {
       "key": "run",
       "value": ""
     },
@@ -1578,6 +1890,26 @@
     },
     {
       "key": "buyerEmail",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "buyerToken",
+      "value": ""
+    },
+    {
+      "key": "sellerToken",
+      "value": ""
+    },
+    {
+      "key": "operatorToken",
+      "value": ""
+    },
+    {
+      "key": "supervisorToken",
       "value": ""
     },
     {

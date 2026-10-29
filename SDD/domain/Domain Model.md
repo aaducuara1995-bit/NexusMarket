@@ -70,12 +70,15 @@ Representa a una persona registrada en la plataforma. Es la base de la identific
 | `document` | `IdentityDocument` | Documento de identidad. Único en la plataforma. |
 | `role` | `UserRole` | Rol único del usuario dentro del sistema (RG-02). No cambia después de creado. |
 | `status` | `UserStatus` | Estado operativo del usuario. Nace `ACTIVE`. |
+| `passwordHash` | `String` | Contraseña cifrada con BCrypt por `PasswordServicePort`. El dominio nunca guarda la contraseña original. |
 
 ## Comportamiento
 
 | Método | Descripción |
 |---|---|
-| `static User restore(UUID id, FullName fullName, Email email, IdentityDocument document, UserRole role, UserStatus status)` | Reconstruye un objeto guardado por un adaptador de persistencia, con su id y su estado. No sirve para crear objetos nuevos. |
+| `static User restore(UUID id, FullName fullName, Email email, IdentityDocument document, UserRole role, UserStatus status)` | Reconstruye un usuario guardado, con su id y su estado. Hay dos versiones: con el hash de la contraseña (persistencia) y sin él (el usuario que viaja en el JWT). |
+| `void assignPasswordHash(String hash)` | Guarda la contraseña ya cifrada. Rechaza un hash vacío. |
+| `boolean hasPassword()` | Indica si el usuario tiene contraseña; sin ella no puede iniciar sesión. |
 | `void block()` | Bloquea al usuario. Falla si ya estaba bloqueado. |
 | `void activate()` | Reactiva al usuario. Falla si ya estaba activo. |
 | `boolean isActive()` | Indica si el usuario está activo. |
@@ -90,6 +93,7 @@ Representa a una persona registrada en la plataforma. Es la base de la identific
 * Correo, documento, nombre y rol son obligatorios.
 * El correo y el documento deben ser únicos en la plataforma (validación crítica de Usuarios); la unicidad la comprueba `RegisterUserService` por medio de `UserRepositoryPort`.
 * Cada usuario tiene un único rol (RG-02).
+* La contraseña se guarda solo como hash y nunca viaja en el token. Un usuario bloqueado no puede iniciar sesión.
 
 ---
 

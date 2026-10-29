@@ -239,6 +239,7 @@ Tabla hija `return_restocked_units`, unida por `return_id`.
 | `document` | `String` | document (único) |
 | `role` | `UserRole` | role (enum como texto) |
 | `status` | `UserStatus` | status (enum como texto) |
+| `password_hash` | `String` | passwordHash |
 
 ### `warehouses` (WarehouseJpaEntity)
 

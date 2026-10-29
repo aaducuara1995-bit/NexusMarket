@@ -47,20 +47,20 @@ class RestControllersPhaseC2Test {
 
     /** Admin creates seller and operator, seller publishes a shirt with 10 units, buyer signs up. */
     private static UUID prepareShop(RestTestContext ctx) {
-        UUID sellerUserId = ctx.adminController.registerUser(ADMIN,
-                new RegisterUserRequestDTO("Vera", "Vendedora", SELLER, "111", UserRole.SELLER)).getBody().id();
-        ctx.adminController.registerUser(ADMIN,
-                new RegisterUserRequestDTO("Oscar", "Operador", OPERATOR, "222", UserRole.LOGISTIC_OPERATOR));
-        SellerResponseDTO seller = ctx.adminController.onboardSeller(ADMIN, new OnboardSellerRequestDTO(sellerUserId,
+        UUID sellerUserId = ctx.adminController.registerUser(ctx.user(ADMIN),
+                new RegisterUserRequestDTO("Vera", "Vendedora", SELLER, "111", RestTestContext.PASSWORD, UserRole.SELLER)).getBody().id();
+        ctx.adminController.registerUser(ctx.user(ADMIN),
+                new RegisterUserRequestDTO("Oscar", "Operador", OPERATOR, "222", RestTestContext.PASSWORD, UserRole.LOGISTIC_OPERATOR));
+        SellerResponseDTO seller = ctx.adminController.onboardSeller(ctx.user(ADMIN), new OnboardSellerRequestDTO(sellerUserId,
                 new WarehouseRequestDTO("Bodega Norte", WarehouseType.PHYSICAL, HOME))).getBody();
 
-        ProductResponseDTO shirt = ctx.sellerController.registerProduct(SELLER, new ProductRequestDTO(
+        ProductResponseDTO shirt = ctx.sellerController.registerProduct(ctx.user(SELLER), new ProductRequestDTO(
                 "Camiseta", "Algodon", ProductType.PHYSICAL, new BigDecimal("45000"), null, List.of("S", "M"))).getBody();
-        ctx.sellerController.registerInitialInventory(SELLER,
+        ctx.sellerController.registerInitialInventory(ctx.user(SELLER),
                 new InitialInventoryRequestDTO(shirt.id(), seller.warehouses().get(0).id(), 10));
-        ctx.sellerController.publishProduct(SELLER, shirt.id());
+        ctx.sellerController.publishProduct(ctx.user(SELLER), shirt.id());
 
-        ctx.publicController.registerBuyer(new RegisterBuyerRequestDTO("Carla", "Compradora", BUYER, "333", HOME));
+        ctx.publicController.registerBuyer(new RegisterBuyerRequestDTO("Carla", "Compradora", BUYER, "333", RestTestContext.PASSWORD, HOME));
         return shirt.id();
     }
 
@@ -69,19 +69,19 @@ class RestControllersPhaseC2Test {
         RestTestContext ctx = new RestTestContext();
         UUID shirtId = prepareShop(ctx);
 
-        ProductResponseDTO listed = ctx.sellerController.consultMyProducts(SELLER).getBody().get(0);
+        ProductResponseDTO listed = ctx.sellerController.consultMyProducts(ctx.user(SELLER)).getBody().get(0);
         assertEquals(ProductStatus.PUBLISHED, listed.status());
         assertEquals(List.of("S", "M"), listed.variants());
         assertEquals("COP", listed.currency());
 
         UUID inventoryId = ctx.inventories.findByProduct(shirtId).get(0).getId();
-        InventoryResponseDTO adjusted = ctx.sellerController.adjustInventory(SELLER, inventoryId,
+        InventoryResponseDTO adjusted = ctx.sellerController.adjustInventory(ctx.user(SELLER), inventoryId,
                 new AdjustInventoryRequestDTO(-3, "Conteo fisico")).getBody();
         assertEquals(7, adjusted.quantity());
         assertEquals("Bodega Norte", adjusted.warehouseName());
-        assertEquals(InventoryStatus.BLOCKED, ctx.sellerController.blockInventory(SELLER, inventoryId).getBody().status());
+        assertEquals(InventoryStatus.BLOCKED, ctx.sellerController.blockInventory(ctx.user(SELLER), inventoryId).getBody().status());
         assertEquals(0, ctx.publicController.consultAvailability(shirtId).getBody().available());
-        assertEquals(InventoryStatus.AVAILABLE, ctx.sellerController.enableInventory(SELLER, inventoryId).getBody().status());
+        assertEquals(InventoryStatus.AVAILABLE, ctx.sellerController.enableInventory(ctx.user(SELLER), inventoryId).getBody().status());
     }
 
     @Test
@@ -89,36 +89,36 @@ class RestControllersPhaseC2Test {
         RestTestContext ctx = new RestTestContext();
         UUID shirtId = prepareShop(ctx);
 
-        CartResponseDTO cart = ctx.buyerController.addToCart(BUYER, new AddToCartRequestDTO(shirtId, 2)).getBody();
+        CartResponseDTO cart = ctx.buyerController.addToCart(ctx.user(BUYER), new AddToCartRequestDTO(shirtId, 2)).getBody();
         assertEquals(new BigDecimal("90000.00"), cart.total());
 
-        ResponseEntity<OrderResponseDTO> confirmed = ctx.buyerController.confirmOrder(BUYER, null);
+        ResponseEntity<OrderResponseDTO> confirmed = ctx.buyerController.confirmOrder(ctx.user(BUYER), null);
         assertEquals(HttpStatus.CREATED, confirmed.getStatusCode());
         OrderResponseDTO order = confirmed.getBody();
         assertEquals(OrderStatus.PENDING_PAYMENT, order.status());
         assertEquals(HOME, order.deliveryAddress());
-        assertTrue(ctx.buyerController.consultMyCart(BUYER).getBody().items().isEmpty());
+        assertTrue(ctx.buyerController.consultMyCart(ctx.user(BUYER)).getBody().items().isEmpty());
 
-        OrderResponseDTO paid = ctx.buyerController.payOrder(BUYER, order.id(),
+        OrderResponseDTO paid = ctx.buyerController.payOrder(ctx.user(BUYER), order.id(),
                 new PaymentRequestDTO(order.total(), null)).getBody();
         assertEquals(OrderStatus.PAID, paid.status());
 
-        assertEquals(1, ctx.logisticController.consultOrdersToShip(OPERATOR).getBody().size());
-        assertEquals(OrderStatus.SHIPPED, ctx.logisticController.shipOrder(OPERATOR, order.id()).getBody().status());
-        assertEquals(OrderStatus.DELIVERED, ctx.logisticController.confirmDelivery(OPERATOR, order.id()).getBody().status());
+        assertEquals(1, ctx.logisticController.consultOrdersToShip(ctx.user(OPERATOR)).getBody().size());
+        assertEquals(OrderStatus.SHIPPED, ctx.logisticController.shipOrder(ctx.user(OPERATOR), order.id()).getBody().status());
+        assertEquals(OrderStatus.DELIVERED, ctx.logisticController.confirmDelivery(ctx.user(OPERATOR), order.id()).getBody().status());
         assertEquals(8, ctx.publicController.consultAvailability(shirtId).getBody().available());
 
-        ResponseEntity<ReturnRequestResponseDTO> requested = ctx.buyerController.requestReturn(BUYER, order.id(),
+        ResponseEntity<ReturnRequestResponseDTO> requested = ctx.buyerController.requestReturn(ctx.user(BUYER), order.id(),
                 new ReturnRequestDTO("Talla equivocada"));
         assertEquals(HttpStatus.CREATED, requested.getStatusCode());
-        ReturnRequestResponseDTO approved = ctx.adminController.approveReturn(ADMIN, requested.getBody().id()).getBody();
-        ctx.adminController.processRefund(ADMIN, approved.refundId());
+        ReturnRequestResponseDTO approved = ctx.adminController.approveReturn(ctx.user(ADMIN), requested.getBody().id()).getBody();
+        ctx.adminController.processRefund(ctx.user(ADMIN), approved.refundId());
 
         UUID inventoryId = ctx.inventories.findByProduct(shirtId).get(0).getId();
-        InventoryResponseDTO restocked = ctx.logisticController.restockFromReturn(OPERATOR, inventoryId,
+        InventoryResponseDTO restocked = ctx.logisticController.restockFromReturn(ctx.user(OPERATOR), inventoryId,
                 new RestockRequestDTO(approved.id(), 2)).getBody();
         assertEquals(10, restocked.quantity());
-        assertEquals(1, ctx.buyerController.consultMyOrders(BUYER).getBody().size());
+        assertEquals(1, ctx.buyerController.consultMyOrders(ctx.user(BUYER)).getBody().size());
     }
 
     @Test
@@ -126,14 +126,14 @@ class RestControllersPhaseC2Test {
         RestTestContext ctx = new RestTestContext();
         UUID shirtId = prepareShop(ctx);
 
-        ctx.buyerController.addToCart(BUYER, new AddToCartRequestDTO(shirtId, 1));
-        assertTrue(ctx.buyerController.removeFromCart(BUYER, shirtId).getBody().items().isEmpty());
+        ctx.buyerController.addToCart(ctx.user(BUYER), new AddToCartRequestDTO(shirtId, 1));
+        assertTrue(ctx.buyerController.removeFromCart(ctx.user(BUYER), shirtId).getBody().items().isEmpty());
 
-        ctx.buyerController.addToCart(BUYER, new AddToCartRequestDTO(shirtId, 1));
+        ctx.buyerController.addToCart(ctx.user(BUYER), new AddToCartRequestDTO(shirtId, 1));
         AddressDTO other = new AddressDTO("Otra casa", "Bello", "Antioquia", "051050");
         assertThrows(IllegalArgumentException.class,
-                () -> ctx.buyerController.confirmOrder(BUYER, new ConfirmOrderRequestDTO(other)));
-        assertEquals(HOME, ctx.buyerController.confirmOrder(BUYER, new ConfirmOrderRequestDTO(HOME))
+                () -> ctx.buyerController.confirmOrder(ctx.user(BUYER), new ConfirmOrderRequestDTO(other)));
+        assertEquals(HOME, ctx.buyerController.confirmOrder(ctx.user(BUYER), new ConfirmOrderRequestDTO(HOME))
                 .getBody().deliveryAddress());
     }
 
@@ -143,10 +143,10 @@ class RestControllersPhaseC2Test {
         UUID shirtId = prepareShop(ctx);
 
         assertThrows(IllegalStateException.class,
-                () -> ctx.buyerController.addToCart(BUYER, new AddToCartRequestDTO(shirtId, 50)));
-        ctx.buyerController.addToCart(BUYER, new AddToCartRequestDTO(shirtId, 1));
-        UUID orderId = ctx.buyerController.confirmOrder(BUYER, null).getBody().id();
-        assertThrows(IllegalArgumentException.class, () -> ctx.buyerController.payOrder(BUYER, orderId,
+                () -> ctx.buyerController.addToCart(ctx.user(BUYER), new AddToCartRequestDTO(shirtId, 50)));
+        ctx.buyerController.addToCart(ctx.user(BUYER), new AddToCartRequestDTO(shirtId, 1));
+        UUID orderId = ctx.buyerController.confirmOrder(ctx.user(BUYER), null).getBody().id();
+        assertThrows(IllegalArgumentException.class, () -> ctx.buyerController.payOrder(ctx.user(BUYER), orderId,
                 new PaymentRequestDTO(new BigDecimal("1000"), null)));
     }
 
@@ -155,9 +155,9 @@ class RestControllersPhaseC2Test {
         RestTestContext ctx = new RestTestContext();
         UUID shirtId = prepareShop(ctx);
 
-        assertThrows(AccessDeniedException.class, () -> ctx.sellerController.consultMyProducts(BUYER));
-        assertThrows(AccessDeniedException.class, () -> ctx.buyerController.consultMyCart(SELLER));
-        assertThrows(AccessDeniedException.class, () -> ctx.logisticController.consultOrdersToShip(SELLER));
-        assertThrows(AccessDeniedException.class, () -> ctx.sellerController.publishProduct(OPERATOR, shirtId));
+        assertThrows(AccessDeniedException.class, () -> ctx.sellerController.consultMyProducts(ctx.user(BUYER)));
+        assertThrows(AccessDeniedException.class, () -> ctx.buyerController.consultMyCart(ctx.user(SELLER)));
+        assertThrows(AccessDeniedException.class, () -> ctx.logisticController.consultOrdersToShip(ctx.user(SELLER)));
+        assertThrows(AccessDeniedException.class, () -> ctx.sellerController.publishProduct(ctx.user(OPERATOR), shirtId));
     }
 }

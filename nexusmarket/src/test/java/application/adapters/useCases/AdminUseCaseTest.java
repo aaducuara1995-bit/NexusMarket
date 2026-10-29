@@ -87,7 +87,7 @@ class AdminUseCaseTest {
         User supervisor = ctx.registered(ctx.admin(), UserRole.SUPERVISOR);
 
         assertThrows(AccessDeniedException.class,
-                () -> ctx.adminUseCase.registerUser(supervisor, ctx.newUser(UserRole.BUYER)));
+                () -> ctx.adminUseCase.registerUser(supervisor, ctx.newUser(UserRole.BUYER), "secret123"));
         assertThrows(AccessDeniedException.class,
                 () -> ctx.adminUseCase.registerMarketplaceWarehouse(supervisor,
                         UseCaseTestContext.draftWarehouse("Centro")));

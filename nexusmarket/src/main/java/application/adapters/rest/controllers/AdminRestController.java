@@ -1,6 +1,5 @@
 package application.adapters.rest.controllers;
 
-import application.adapters.rest.AuthenticatedUserResolver;
 import application.adapters.rest.RestReferenceLoader;
 import application.adapters.rest.dtos.requests.OnboardSellerRequestDTO;
 import application.adapters.rest.dtos.requests.RegisterUserRequestDTO;
@@ -25,12 +24,12 @@ import application.domain.ports.in.AdminPort;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,41 +43,39 @@ import java.util.UUID;
 public class AdminRestController {
 
     private final AdminPort adminPort;
-    private final AuthenticatedUserResolver currentUser;
     private final RestReferenceLoader loader;
 
-    public AdminRestController(AdminPort adminPort, AuthenticatedUserResolver currentUser,
+    public AdminRestController(AdminPort adminPort,
                                RestReferenceLoader loader) {
         this.adminPort = adminPort;
-        this.currentUser = currentUser;
         this.loader = loader;
     }
 
     @PostMapping("/users")
-    public ResponseEntity<UserResponseDTO> registerUser(@RequestHeader(AuthenticatedUserResolver.HEADER) String email,
+    public ResponseEntity<UserResponseDTO> registerUser(@AuthenticationPrincipal(expression = "user") User user,
                                                         @Valid @RequestBody RegisterUserRequestDTO request) {
-        User registered = adminPort.registerUser(currentUser.resolve(email), UserRestMapper.toDomain(request));
+        User registered = adminPort.registerUser(user, UserRestMapper.toDomain(request), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).body(UserRestMapper.toResponseDTO(registered));
     }
 
     @PatchMapping("/users/{userId}/block")
-    public ResponseEntity<UserResponseDTO> blockUser(@RequestHeader(AuthenticatedUserResolver.HEADER) String email,
+    public ResponseEntity<UserResponseDTO> blockUser(@AuthenticationPrincipal(expression = "user") User user,
                                                      @PathVariable("userId") UUID userId) {
-        User blocked = adminPort.blockUser(currentUser.resolve(email), loader.user(userId));
+        User blocked = adminPort.blockUser(user, loader.user(userId));
         return ResponseEntity.ok(UserRestMapper.toResponseDTO(blocked));
     }
 
     @PatchMapping("/users/{userId}/activate")
-    public ResponseEntity<UserResponseDTO> activateUser(@RequestHeader(AuthenticatedUserResolver.HEADER) String email,
+    public ResponseEntity<UserResponseDTO> activateUser(@AuthenticationPrincipal(expression = "user") User user,
                                                         @PathVariable("userId") UUID userId) {
-        User active = adminPort.activateUser(currentUser.resolve(email), loader.user(userId));
+        User active = adminPort.activateUser(user, loader.user(userId));
         return ResponseEntity.ok(UserRestMapper.toResponseDTO(active));
     }
 
     @PostMapping("/sellers")
-    public ResponseEntity<SellerResponseDTO> onboardSeller(@RequestHeader(AuthenticatedUserResolver.HEADER) String email,
+    public ResponseEntity<SellerResponseDTO> onboardSeller(@AuthenticationPrincipal(expression = "user") User user,
                                                            @Valid @RequestBody OnboardSellerRequestDTO request) {
-        Seller seller = adminPort.onboardSeller(currentUser.resolve(email), loader.user(request.userId()),
+        Seller seller = adminPort.onboardSeller(user, loader.user(request.userId()),
                 WarehouseRestMapper.toDraft(request.firstWarehouse()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SellerRestMapper.toResponseDTO(seller, loader.warehousesOfSeller(seller.getId())));
@@ -86,19 +83,19 @@ public class AdminRestController {
 
     @PostMapping("/warehouses")
     public ResponseEntity<WarehouseResponseDTO> registerMarketplaceWarehouse(
-            @RequestHeader(AuthenticatedUserResolver.HEADER) String email,
+            @AuthenticationPrincipal(expression = "user") User user,
             @Valid @RequestBody WarehouseRequestDTO request) {
-        Warehouse warehouse = adminPort.registerMarketplaceWarehouse(currentUser.resolve(email),
+        Warehouse warehouse = adminPort.registerMarketplaceWarehouse(user,
                 WarehouseRestMapper.toDraft(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(WarehouseRestMapper.toResponseDTO(warehouse));
     }
 
     @PostMapping("/sellers/{sellerId}/warehouses")
     public ResponseEntity<WarehouseResponseDTO> registerSellerWarehouse(
-            @RequestHeader(AuthenticatedUserResolver.HEADER) String email,
+            @AuthenticationPrincipal(expression = "user") User user,
             @PathVariable("sellerId") UUID sellerId,
             @Valid @RequestBody WarehouseRequestDTO request) {
-        Warehouse warehouse = adminPort.registerSellerWarehouse(currentUser.resolve(email),
+        Warehouse warehouse = adminPort.registerSellerWarehouse(user,
                 loader.seller(sellerId), WarehouseRestMapper.toDraft(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(WarehouseRestMapper.toResponseDTO(warehouse));
     }
@@ -106,30 +103,30 @@ public class AdminRestController {
     /** Approving also generates the refund; its id comes back in refundId. */
     @PatchMapping("/returns/{returnId}/approve")
     public ResponseEntity<ReturnRequestResponseDTO> approveReturn(
-            @RequestHeader(AuthenticatedUserResolver.HEADER) String email, @PathVariable("returnId") UUID returnId) {
-        ReturnRequest approved = adminPort.approveReturn(currentUser.resolve(email), loader.returnRequest(returnId));
+            @AuthenticationPrincipal(expression = "user") User user, @PathVariable("returnId") UUID returnId) {
+        ReturnRequest approved = adminPort.approveReturn(user, loader.returnRequest(returnId));
         return ResponseEntity.ok(ReturnRequestRestMapper.toResponseDTO(approved,
                 loader.refundOfOrder(approved.getOrder().getId())));
     }
 
     @PatchMapping("/returns/{returnId}/reject")
     public ResponseEntity<ReturnRequestResponseDTO> rejectReturn(
-            @RequestHeader(AuthenticatedUserResolver.HEADER) String email, @PathVariable("returnId") UUID returnId) {
-        ReturnRequest rejected = adminPort.rejectReturn(currentUser.resolve(email), loader.returnRequest(returnId));
+            @AuthenticationPrincipal(expression = "user") User user, @PathVariable("returnId") UUID returnId) {
+        ReturnRequest rejected = adminPort.rejectReturn(user, loader.returnRequest(returnId));
         return ResponseEntity.ok(ReturnRequestRestMapper.toResponseDTO(rejected, Optional.empty()));
     }
 
     @PatchMapping("/refunds/{refundId}/process")
     public ResponseEntity<RefundResponseDTO> processRefund(
-            @RequestHeader(AuthenticatedUserResolver.HEADER) String email, @PathVariable("refundId") UUID refundId) {
+            @AuthenticationPrincipal(expression = "user") User user, @PathVariable("refundId") UUID refundId) {
         return ResponseEntity.ok(RefundRestMapper.toResponseDTO(
-                adminPort.processRefund(currentUser.resolve(email), loader.refund(refundId))));
+                adminPort.processRefund(user, loader.refund(refundId))));
     }
 
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLogResponseDTO>> consultAuditLog(
-            @RequestHeader(AuthenticatedUserResolver.HEADER) String email) {
-        return ResponseEntity.ok(adminPort.consultAuditLog(currentUser.resolve(email)).stream()
+            @AuthenticationPrincipal(expression = "user") User user) {
+        return ResponseEntity.ok(adminPort.consultAuditLog(user).stream()
                 .map(AuditLogRestMapper::toResponseDTO).toList());
     }
 }

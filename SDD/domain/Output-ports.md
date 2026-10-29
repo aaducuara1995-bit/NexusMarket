@@ -17,7 +17,7 @@ Persistence Adapter  (adapters/persistence, Fase B: MySQL)
 Base de datos
 ```
 
-Hay 15 puertos, uno por entidad que se guarda. Siguiendo el proyecto de referencia, la auditoría (`AuditLogRepositoryPort`) va en MongoDB y el resto en MySQL. Las búsquedas devuelven `Optional` cuando puede no haber resultado y `List` cuando puede haber varios. En las pruebas se usan implementaciones en memoria (`InMemoryRepositories`).
+Hay 17 puertos: 15 repositorios, uno por entidad que se guarda, y 2 servicios técnicos de seguridad (`PasswordServicePort` y `TokenServicePort`). Siguiendo el proyecto de referencia, la auditoría (`AuditLogRepositoryPort`) va en MongoDB y el resto de repositorios en MySQL. Las búsquedas devuelven `Optional` cuando puede no haber resultado y `List` cuando puede haber varios. En las pruebas se usan implementaciones en memoria (`InMemoryRepositories`).
 
 ---
 
@@ -118,6 +118,17 @@ List<Order> findAll();
 void save(Order order);
 ```
 
+## PasswordServicePort
+
+Cifra y compara contraseñas. Lo implementa `BCryptPasswordServiceAdapter` con BCrypt, en la capa de seguridad.
+
+**Lo usan:** `LoginService`, `RegisterUserService`
+
+```java
+String encrypt(String rawPassword);
+boolean matches(String rawPassword, String passwordHash);
+```
+
 ## ProductRepositoryPort
 
 Productos: unicidad del nombre por vendedor, productos de un vendedor y catálogo publicado.
@@ -180,11 +191,21 @@ Optional<Shipment> findByOrder(UUID orderId);
 void save(Shipment shipment);
 ```
 
+## TokenServicePort
+
+Genera el token de acceso de un usuario autenticado. Lo implementa `JwtProvider` con JWT; el dominio no conoce el formato del token.
+
+**Lo usan:** `LoginService`
+
+```java
+String generateToken(User user);
+```
+
 ## UserRepositoryPort
 
 Usuarios de la plataforma: unicidad de correo y documento, búsqueda y guardado.
 
-**Lo usan:** `AdminUseCaseImpl`, `RegisterUserService`, `SupervisorUseCaseImpl`
+**Lo usan:** `AdminUseCaseImpl`, `LoginService`, `RegisterUserService`, `SupervisorUseCaseImpl`
 
 ```java
 boolean existsByEmail(Email email);

@@ -40,7 +40,7 @@ public class PublicAccessRestController {
     @PostMapping("/buyers")
     public ResponseEntity<BuyerResponseDTO> registerBuyer(@Valid @RequestBody RegisterBuyerRequestDTO request) {
         Buyer buyer = publicAccessPort.registerBuyer(UserRestMapper.toDomain(request),
-                AddressRestMapper.toDomain(request.mainAddress()));
+                AddressRestMapper.toDomain(request.mainAddress()), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).body(BuyerRestMapper.toResponseDTO(buyer));
     }
 

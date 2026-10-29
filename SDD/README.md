@@ -14,7 +14,8 @@ SDD
 │   ├── Input-ports.md             puertos de entrada por rol
 │   └── Output-ports.md            puertos de salida (repositorios)
 └── Adapters
-    ├── Api-rest-endpoints.md      los 46 endpoints por rol, con cuerpos y respuestas
+    ├── Api-rest-endpoints.md      los 47 endpoints (login y uno por rol), con cuerpos y respuestas
+    ├── Rest-security.md           login, JWT, reglas por ruta y CORS
     ├── Rest-adapters.md           controladores, DTOs, mappers y decisiones de la capa REST
     ├── Global-exception-handler.md  cómo cada error se convierte en código HTTP
     ├── Use-cases-adapters.md      casos de uso que implementan los puertos por rol
@@ -27,24 +28,24 @@ SDD
 application
 ├── domain
 │   ├── entities        17 entidades
-│   ├── valueobjects    5 objetos de valor
+│   ├── valueobjects    6 objetos de valor
 │   ├── enums           16 enumeraciones
-│   ├── exceptions      AccessDeniedException, EntityNotFoundException
-│   ├── services        34 servicios de dominio
+│   ├── exceptions      AccessDeniedException, EntityNotFoundException, InvalidCredentialsException
+│   ├── services        35 servicios de dominio
 │   └── ports
 │       ├── in          6 puertos de entrada, uno por rol más el acceso público
-│       └── out         15 puertos de salida (14 MySQL, 1 MongoDB)
+│       └── out         17 puertos de salida (14 MySQL, 1 MongoDB, 2 de seguridad)
 └── adapters
     ├── config          DomainServicesConfig (servicios como beans) y BootstrapAdminRunner
-    ├── rest            6 controladores REST con sus DTOs, mappers y manejo de errores
-    ├── security        configuración de seguridad (temporal hasta la Fase D)
+    ├── rest            7 controladores REST (login y uno por rol) con sus DTOs, mappers y manejo de errores
+    ├── security        JWT, BCrypt, filtro de autenticación y reglas por rol
     ├── useCases        6 casos de uso, InventoryOperationsSupport y Lookup
     └── persistence
         ├── jpa         14 adaptadores MySQL con sus entidades, mappers y repositorios
         └── mongodb     adaptador de auditoría con su documento, mapper y repositorio
 ```
 
-Las reglas del dominio y los flujos de los casos de uso están cubiertos por 253 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
+Las reglas del dominio y los flujos de los casos de uso están cubiertos por 273 pruebas automáticas con JUnit en `nexusmarket/src/test/java/application/`.
 
 ## Cómo levantar la aplicación
 
@@ -65,4 +66,4 @@ cd nexusmarket
 
 En los dos casos Hibernate crea las tablas, se crea la colección de auditoría y, si no hay ningún administrador, se crea el inicial.
 
-Con la aplicación arriba, la API queda en `http://localhost:8080/api/v1/...`. La lista completa está en `Adapters/Api-rest-endpoints.md`.
+Con la aplicación arriba, la API queda en `http://localhost:8080/api/v1/...`. Primero se inicia sesión en `POST /api/v1/auth/login` (el administrador inicial es `admin@nexusmarket.com` con `Admin12345*`) y el token se envía como `Authorization: Bearer <token>`. La lista completa está en `Adapters/Api-rest-endpoints.md`.

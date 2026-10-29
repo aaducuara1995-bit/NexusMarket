@@ -11,7 +11,7 @@ Así cada rol ve solo las operaciones que tiene permitidas, y la capa REST y la 
 # Principios
 
 * **Aislamiento por rol.** Cada puerto agrupa las operaciones de un solo rol. Si dos roles comparten una operación (por ejemplo, el inventario del vendedor y del operador logístico), aparece en ambos puertos.
-* **Parámetros del dominio.** Los métodos reciben entidades y objetos de valor del dominio, nunca DTOs. El primer parámetro es el `User` que hace la petición; en la etapa de seguridad se reconstruirá a partir del token JWT.
+* **Parámetros del dominio.** Los métodos reciben entidades y objetos de valor del dominio, nunca DTOs. El primer parámetro es el `User` que hace la petición, reconstruido a partir del token JWT.
 * **Implementación en adaptadores.** Cada puerto lo implementa una clase de `adapters/useCases/` (ver `../Adapters/Use-cases-adapters.md`). Los servicios de dominio ya no implementan puertos: son las piezas que esas clases inyectan.
 
 ---
@@ -20,14 +20,15 @@ Así cada rol ve solo las operaciones que tiene permitidas, y la capa REST y la 
 
 ## 1. PublicAccessPort
 
-Operaciones disponibles sin iniciar sesión: el registro de compradores y la consulta del catálogo.
+Operaciones disponibles sin iniciar sesión: el login, el registro de compradores y la consulta del catálogo.
 
 **Rol:** Público (sin autenticación)  
 **Implementado por:** `PublicAccessUseCaseImpl`
 
 ```java
 public interface PublicAccessPort {
-    Buyer registerBuyer(User user, Address mainAddress);
+    AuthenticationResult login(Email email, String password);
+    Buyer registerBuyer(User user, Address mainAddress, String password);
     List<Product> consultCatalog();
     int consultAvailability(Product product);
 }
@@ -105,7 +106,7 @@ Usuarios, alta de vendedores, bodegas y decisiones de posventa (devoluciones y r
 
 ```java
 public interface AdminPort {
-    User registerUser(User admin, User newUser);
+    User registerUser(User admin, User newUser, String password);
     User blockUser(User admin, User target);
     User activateUser(User admin, User target);
     Seller onboardSeller(User admin, User sellerUser, Warehouse firstWarehouse);

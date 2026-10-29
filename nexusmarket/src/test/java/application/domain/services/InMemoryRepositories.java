@@ -23,11 +23,13 @@ import application.domain.ports.out.InventoryRepositoryPort;
 import application.domain.ports.out.InventoryReservationRepositoryPort;
 import application.domain.ports.out.InvoiceRepositoryPort;
 import application.domain.ports.out.OrderRepositoryPort;
+import application.domain.ports.out.PasswordServicePort;
 import application.domain.ports.out.ProductRepositoryPort;
 import application.domain.ports.out.RefundRepositoryPort;
 import application.domain.ports.out.ReturnRequestRepositoryPort;
 import application.domain.ports.out.SellerRepositoryPort;
 import application.domain.ports.out.ShipmentRepositoryPort;
+import application.domain.ports.out.TokenServicePort;
 import application.domain.ports.out.UserRepositoryPort;
 import application.domain.ports.out.WarehouseRepositoryPort;
 import application.domain.valueobjects.Email;
@@ -223,5 +225,19 @@ public final class InMemoryRepositories {
         public List<AuditLog> findByAffectedEntity(UUID entityId) {
             return where(a -> a.getAffectedEntityId().equals(entityId));
         }
+    }
+
+    /** Readable fake hashing for tests: "hash:" + password. */
+    public static class FakePasswords implements PasswordServicePort {
+        public String encrypt(String rawPassword) { return "hash:" + rawPassword; }
+
+        public boolean matches(String rawPassword, String passwordHash) {
+            return passwordHash != null && passwordHash.equals("hash:" + rawPassword);
+        }
+    }
+
+    /** Fake token: "token-" + user id. */
+    public static class FakeTokens implements TokenServicePort {
+        public String generateToken(User user) { return "token-" + user.getId(); }
     }
 }

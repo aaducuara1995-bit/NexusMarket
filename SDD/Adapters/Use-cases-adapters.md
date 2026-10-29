@@ -30,7 +30,7 @@ Use Case Adapter (adapters/useCases)
 
 | Puerto | Clase | Servicios inyectados | Repositorios inyectados |
 |---|---|---|---|
-| `PublicAccessPort` | `PublicAccessUseCaseImpl` | `RegisterUserService`, `RegisterBuyerService`, `CheckAvailabilityService`, `RegisterAuditLogService` | `ProductRepositoryPort`, `InventoryRepositoryPort` |
+| `PublicAccessPort` | `PublicAccessUseCaseImpl` | `LoginService`, `RegisterUserService`, `RegisterBuyerService`, `CheckAvailabilityService`, `RegisterAuditLogService` | `ProductRepositoryPort`, `InventoryRepositoryPort` |
 | `BuyerPort` | `BuyerUseCaseImpl` | `AuthorizationService`, `AddToCartService`, `ConfirmOrderService`, `PayOrderService`, `IssueInvoiceService`, `DeliverDigitalOrderService`, `CreateShipmentService`, `RequestReturnService`, `RegisterAuditLogService` | `BuyerRepositoryPort`, `CartRepositoryPort`, `ProductRepositoryPort`, `InventoryRepositoryPort`, `InventoryReservationRepositoryPort`, `InventoryMovementRepositoryPort`, `OrderRepositoryPort`, `InvoiceRepositoryPort`, `ShipmentRepositoryPort`, `ReturnRequestRepositoryPort` |
 | `SellerPort` | `SellerUseCaseImpl` | `AuthorizationService`, `RegisterProductService`, `PublishProductService`, `ChangeProductStatusService`, `InventoryOperationsSupport`, `RegisterAuditLogService` | `SellerRepositoryPort`, `ProductRepositoryPort`, `InventoryRepositoryPort` |
 | `LogisticOperatorPort` | `LogisticOperatorUseCaseImpl` | `AuthorizationService`, `ShipOrderService`, `ConfirmDeliveryService`, `InventoryOperationsSupport`, `RegisterAuditLogService` | `OrderRepositoryPort`, `ShipmentRepositoryPort`, `InventoryReservationRepositoryPort`, `InventoryMovementRepositoryPort`, `InventoryRepositoryPort` |

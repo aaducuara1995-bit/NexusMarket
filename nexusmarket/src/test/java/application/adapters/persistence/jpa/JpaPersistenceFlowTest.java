@@ -55,7 +55,7 @@ class JpaPersistenceFlowTest {
         User admin = newUser(UserRole.ADMIN);
         ctx.users.save(admin);
 
-        User sellerUser = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SELLER));
+        User sellerUser = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SELLER), "secret123");
         ctx.adminUseCase.onboardSeller(admin, sellerUser,
                 Warehouse.ofMarketplace("Bodega Norte", WarehouseType.PHYSICAL, address("Bodega 1")));
         Warehouse warehouse = ctx.warehouses.findAll().get(0);
@@ -69,7 +69,7 @@ class JpaPersistenceFlowTest {
         assertEquals(1, ctx.publicAccess.consultCatalog().size());
         assertEquals(java.util.List.of("M"), ctx.products.findById(product.getId()).orElseThrow().getVariants());
 
-        Buyer buyer = ctx.publicAccess.registerBuyer(newUser(UserRole.BUYER), address("Calle 10"));
+        Buyer buyer = ctx.publicAccess.registerBuyer(newUser(UserRole.BUYER), address("Calle 10"), "secret123");
         User buyerUser = ctx.users.findById(buyer.getUserId()).orElseThrow();
         Address office = address("Oficina 404");
         Buyer storedBuyer = ctx.buyers.findById(buyer.getId()).orElseThrow();
@@ -92,7 +92,7 @@ class JpaPersistenceFlowTest {
                 ctx.invoices.findByOrder(order.getId()).orElseThrow().getTotal());
         assertEquals(office, ctx.shipments.findByOrder(order.getId()).orElseThrow().getDeliveryAddress());
 
-        User operator = ctx.adminUseCase.registerUser(admin, newUser(UserRole.LOGISTIC_OPERATOR));
+        User operator = ctx.adminUseCase.registerUser(admin, newUser(UserRole.LOGISTIC_OPERATOR), "secret123");
         assertEquals(1, ctx.logisticUseCase.consultOrdersToShip(operator).size());
         ctx.logisticUseCase.shipOrder(operator, order);
         Inventory afterShipping = ctx.inventories.findByProduct(product.getId()).get(0);
@@ -125,7 +125,7 @@ class JpaPersistenceFlowTest {
         JpaTestContext ctx = new JpaTestContext();
         User admin = newUser(UserRole.ADMIN);
         ctx.users.save(admin);
-        User sellerUser = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SELLER));
+        User sellerUser = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SELLER), "secret123");
         ctx.adminUseCase.onboardSeller(admin, sellerUser,
                 Warehouse.ofMarketplace("Bodega Digital", WarehouseType.DIGITAL, null));
         assertNull(ctx.warehouses.findAll().get(0).getAddress());
@@ -133,7 +133,7 @@ class JpaPersistenceFlowTest {
         Product ebook = ctx.sellerUseCase.registerProduct(sellerUser, new Product(UUID.randomUUID(), "Ebook",
                 null, ProductType.DIGITAL, new Money(new BigDecimal("20000"))));
         ctx.sellerUseCase.publishProduct(sellerUser, ebook);
-        Buyer buyer = ctx.publicAccess.registerBuyer(newUser(UserRole.BUYER), address("Calle 5"));
+        Buyer buyer = ctx.publicAccess.registerBuyer(newUser(UserRole.BUYER), address("Calle 5"), "secret123");
         User buyerUser = ctx.users.findById(buyer.getUserId()).orElseThrow();
 
         ctx.buyerUseCase.addToCart(buyerUser, ebook, 1);
@@ -150,12 +150,12 @@ class JpaPersistenceFlowTest {
         JpaTestContext ctx = new JpaTestContext();
         User admin = newUser(UserRole.ADMIN);
         ctx.users.save(admin);
-        User sellerUser = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SELLER));
+        User sellerUser = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SELLER), "secret123");
 
         assertTrue(ctx.users.existsByEmail(new Email(sellerUser.getEmail().value().toUpperCase())));
         assertThrows(IllegalStateException.class, () -> ctx.adminUseCase.registerUser(admin,
                 new User(new FullName("Otra", "Persona"), sellerUser.getEmail(), new IdentityDocument("777"),
-                        UserRole.BUYER)));
+                        UserRole.BUYER), "secret123"));
 
         ctx.adminUseCase.onboardSeller(admin, sellerUser,
                 Warehouse.ofMarketplace("Centro", WarehouseType.PHYSICAL, address("Bodega 2")));
@@ -171,7 +171,7 @@ class JpaPersistenceFlowTest {
         JpaTestContext ctx = new JpaTestContext();
         User admin = newUser(UserRole.ADMIN);
         ctx.users.save(admin);
-        User supervisor = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SUPERVISOR));
+        User supervisor = ctx.adminUseCase.registerUser(admin, newUser(UserRole.SUPERVISOR), "secret123");
 
         ctx.adminUseCase.blockUser(admin, supervisor);
 
